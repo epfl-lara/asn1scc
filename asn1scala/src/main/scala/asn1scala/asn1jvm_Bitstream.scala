@@ -1495,7 +1495,7 @@ case class BitStream private [asn1scala](
          }
       }
    }.ensuring { _ =>
-      BitStream.bitIndex(old(this).buf.length, old(this).currentByte, old(this).currentBit ) + to - from == BitStream.bitIndex(this.buf.length, this.currentByte, this.currentBit ) &&
+      BitStream.bitIndex(old(this).buf.length, old(this).currentByte, old(this).currentBit) + to - from == BitStream.bitIndex(this.buf.length, this.currentByte, this.currentBit ) &&
       old(this).buf == this.buf &&
       old(arr).length == arr.length &&
       // arrayBitRangesEq(old(arr), arr, 0, from) &&
