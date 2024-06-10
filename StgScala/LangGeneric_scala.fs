@@ -7,6 +7,8 @@ open Language
 open System.IO
 open System
 open Asn1AcnAstUtilFunctions
+open ProofGen
+open ProofAst
 
 let rec resolveReferenceType(t: Asn1TypeKind): Asn1TypeKind =
     match t with
@@ -316,34 +318,109 @@ type LangGeneric_scala() =
 
         override this.bitStringValueToByteArray (v : BitStringValue) = FsUtils.bitStringValueToByteArray (StringLoc.ByValue v)
 
+        override this.generateSequenceOfLikeAuxiliaries (enc: Asn1Encoding) (o: SequenceOfLike) (pg: SequenceOfLikeProofGen) (codec: Codec): string list * string option =
+            let fds, call = generateSequenceOfLikeAuxiliaries enc o pg codec
+            fds |> List.collect (fun fd -> [show (FunDefTree fd); ""]), Some (show (ExprTree call))
+
+        override this.generateOptionalAuxiliaries (enc: Asn1Encoding) (soc: SequenceOptionalChild) (codec: Codec): string list * string =
+            let fds, call = generateOptionalAuxiliaries enc soc codec
+            // TODO: needs to have ACN dependencies parameterized to be able to hoist
+            let innerFns = fds |> List.collect (fun fd -> [show (FunDefTree fd); ""])
+            [], innerFns.StrJoin "\n" + "\n\n" + show (ExprTree call)
+
+        override this.adaptAcnFuncBody (funcBody: AcnFuncBody) (isValidFuncName: string option) (t: Asn1AcnAst.Asn1Type) (codec: Codec): AcnFuncBody =
+            let shouldWrap  =
+                match t.Kind with
+                | Asn1AcnAst.ReferenceType rt -> rt.hasExtraConstrainsOrChildrenOrAcnArgs
+                | Asn1AcnAst.Sequence _ | Asn1AcnAst.Choice _ | Asn1AcnAst.SequenceOf _ -> true
+                | _ -> false
+
+            let newFuncBody (s: State)
+                            (err: ErrorCode)
+                            (prms: (AcnGenericTypes.RelativePath * AcnGenericTypes.AcnParameter) list)
+                            (nestingScope: NestingScope)
+                            (p: CallerScope): (AcnFuncBodyResult option) * State =
+                if not nestingScope.isInit && shouldWrap then
+                    let recP = {p with arg = p.arg.asLastOrSelf}
+                    let recNS = NestingScope.init t.acnMaxSizeInBits t.uperMaxSizeInBits ((p, t) :: nestingScope.parents)
+                    let res, s = funcBody s err prms recNS recP
+                    match res with
+                    | Some res ->
+                        let fd, call = wrapAcnFuncBody isValidFuncName t res.funcBody codec nestingScope p recP
+                        let fdStr = show (FunDefTree fd)
+                        let callStr = show (ExprTree call)
+                        let newBody = fdStr + "\n" + callStr
+                        // TODO: Hack
+                        let resultExpr =
+                            match res.resultExpr with
+                            | Some res when res = recP.arg.asIdentifier -> Some p.arg.asIdentifier
+                            | Some res -> Some res
+                            | None -> None
+                        Some {res with funcBody = newBody; resultExpr = resultExpr}, s
+                    | None -> None, s
+                else funcBody s err prms nestingScope p
+
+            newFuncBody
+
         // TODO: Replace with an AST when it becomes complete
         override this.generatePrecond (enc: Asn1Encoding) (t: Asn1AcnAst.Asn1Type) = [$"codec.base.bitStream.validate_offset_bits({t.maxSizeInBits enc})"]
 
-        // TODO: Replace with an AST when it becomes complete
         override this.generatePostcond (enc: Asn1Encoding) (funcNameBase: string) (p: CallerScope) (t: Asn1AcnAst.Asn1Type) (codec: Codec) =
-            let suffix, buf =
+            let errTpe = IntegerType Int
+            let postcondExpr =
                 match codec with
-                | Encode -> "", "w1.base.bitStream.buf.length == w2.base.bitStream.buf.length"
-                | Decode -> "Mut", "w1.base.bitStream.buf == w2.base.bitStream.buf"
-            let res = $"""
-res match
-    case Left{suffix}(_) => true
-    case Right{suffix}(res) =>
-        val w1 = old(codec)
-        val w2 = codec
-        {buf} && w2.base.bitStream.bitIndex <= w1.base.bitStream.bitIndex + {t.maxSizeInBits enc}"""
-            Some (res.TrimStart())
+                | Encode ->
+                    let resPostcond = {Var.name = "res"; tpe = ClassType (eitherTpe errTpe (IntegerType Int))}
+                    let decodePureId = $"{t.FT_TypeDefinition.[Scala].typeName}_ACN_Decode_pure"
+                    generateEncodePostcondExpr t p.arg resPostcond decodePureId
+                | Decode ->
+                    let resPostcond = {Var.name = "res"; tpe = ClassType (eitherMutTpe errTpe (fromAsn1TypeKind t.Kind))}
+                    generateDecodePostcondExpr t resPostcond
+            Some (show (ExprTree postcondExpr))
 
         override this.generateSequenceChildProof (enc: Asn1Encoding) (stmts: string option list) (pg: SequenceProofGen) (codec: Codec): string list =
-            ProofGen.generateSequenceChildProof enc stmts pg codec
+            generateSequenceChildProof enc stmts pg codec
+
+        override this.generateSequenceProof (enc: Asn1Encoding) (t: Asn1AcnAst.Asn1Type) (sq: Asn1AcnAst.Sequence) (sel: Selection) (codec: Codec): string list =
+            let proof = generateSequenceProof enc t sq sel codec
+            proof |> Option.map (fun p -> show (ExprTree p)) |> Option.toList
 
         override this.generateSequenceOfLikeProof (enc: Asn1Encoding) (o: SequenceOfLike) (pg: SequenceOfLikeProofGen) (codec: Codec): SequenceOfLikeProofGenResult option =
-            ProofGen.generateSequenceOfLikeProof enc o pg codec
+            generateSequenceOfLikeProof enc o pg codec
 
         override this.generateIntFullyConstraintRangeAssert (topLevelTd: string) (p: CallerScope) (codec: Codec): string option =
+            None
+            // TODO: Need something better than that
+            (*
             match codec with
             | Encode -> Some $"assert({topLevelTd}_IsConstraintValid(pVal).isRight)" // TODO: HACK: When for CHOICE, `p` gets reset to the choice variant name, so we hardcode "pVal" here...
             | Decode -> None
+            *)
+        override this.generateOctetStringInvariants (t: Asn1AcnAst.Asn1Type) (os: Asn1AcnAst.OctetString): string list =
+            let inv = octetStringInvariants t os This
+            [$"require({show (ExprTree inv)})"]
+
+        override this.generateBitStringInvariants (t: Asn1AcnAst.Asn1Type) (bs: Asn1AcnAst.BitString): string list =
+            let inv = bitStringInvariants t bs This
+            [$"require({show (ExprTree inv)})"]
+
+        override this.generateSequenceInvariants (t: Asn1AcnAst.Asn1Type) (sq: Asn1AcnAst.Sequence) (children: SeqChildInfo list): string list =
+            let inv = sequenceInvariants t sq children This
+            inv |> Option.map (fun inv -> $"require({show (ExprTree inv)})") |> Option.toList
+
+        override this.generateSequenceOfInvariants (t: Asn1AcnAst.Asn1Type) (sqf: Asn1AcnAst.SequenceOf) (tpe: DAst.Asn1TypeKind): string list =
+            let inv = sequenceOfInvariants sqf This
+            [$"require({show (ExprTree inv)})"]
+
+
+        override this.generateSequenceSizeDefinitions (t: Asn1AcnAst.Asn1Type) (sq: Asn1AcnAst.Sequence) (children: SeqChildInfo list): string list =
+            generateSequenceSizeDefinitions t sq children
+
+        override this.generateChoiceSizeDefinitions (t: Asn1AcnAst.Asn1Type) (choice: Asn1AcnAst.Choice) (children: DAst.ChChildInfo list): string list =
+            generateChoiceSizeDefinitions t choice children
+
+        override this.generateSequenceOfSizeDefinitions (t: Asn1AcnAst.Asn1Type) (sqf: Asn1AcnAst.SequenceOf) (elemTpe: DAst.Asn1Type): string list =
+            generateSequenceOfSizeDefinitions t sqf elemTpe
 
         override this.uper =
             {

@@ -88,17 +88,17 @@ let internal createUperFunction (r:Asn1AcnAst.AstRoot)
     let sStar = lm.lg.getStar p.arg
     let isValidFuncName = match isValidFunc with None -> None | Some f -> f.funcName
     let sInitialExp = ""
-    let func, funcDef =
+    let func, funcDef, auxiliaries =
             match funcName  with
-            | None              -> None, None
+            | None              -> None, None, []
             | Some funcName     ->
-                let content = funcBody (NestingScope.init t.acnMaxSizeInBits t.uperMaxSizeInBits) p
-                let bodyResult_funcBody, errCodes,  bodyResult_localVariables, bBsIsUnreferenced, bVarNameIsUnreferenced =
+                let content = funcBody (NestingScope.init t.acnMaxSizeInBits t.uperMaxSizeInBits []) p
+                let bodyResult_funcBody, errCodes,  bodyResult_localVariables, bBsIsUnreferenced, bVarNameIsUnreferenced, auxiliaries =
                     match content with
                     | None              ->
                         let emptyStatement = lm.lg.emptyStatement
-                        emptyStatement, [], [], true, isValidFuncName.IsNone
-                    | Some bodyResult   -> bodyResult.funcBody, bodyResult.errCodes, bodyResult.localVariables, bodyResult.bBsIsUnReferenced, bodyResult.bValIsUnReferenced
+                        emptyStatement, [], [], true, isValidFuncName.IsNone, []
+                    | Some bodyResult   -> bodyResult.funcBody, bodyResult.errCodes, bodyResult.localVariables, bodyResult.bBsIsUnReferenced, bodyResult.bValIsUnReferenced, bodyResult.auxiliaries
                 let lvars = bodyResult_localVariables |> List.map(fun (lv:LocalVariable) -> lm.lg.getLocalVariableDeclaration lv) |> Seq.distinct
                 let precondAnnots = lm.lg.generatePrecond UPER t
                 let postcondAnnots = lm.lg.generatePostcond UPER typeDef.typeName p t codec
@@ -106,7 +106,7 @@ let internal createUperFunction (r:Asn1AcnAst.AstRoot)
 
                 let errCodStr = errCodes |> List.map(fun x -> (EmitTypeAssignment_def_err_code x.errCodeName) (BigInteger x.errCodeValue))
                 let funcDef = Some(EmitTypeAssignment_def varName sStar funcName  (lm.lg.getLongTypedefName typeDefinition) errCodStr (t.uperMaxSizeInBits = 0I) (BigInteger (ceil ((double t.uperMaxSizeInBits)/8.0))) ( t.uperMaxSizeInBits) soSparkAnnotations (t.uperMaxSizeInBits = 0I) codec)
-                func, funcDef
+                func, funcDef, auxiliaries
 
 
     let ret =
@@ -116,6 +116,7 @@ let internal createUperFunction (r:Asn1AcnAst.AstRoot)
             funcDef                    = funcDef
             funcBody                   = funcBody
             funcBody_e                 = funcBody_e
+            auxiliaries                = auxiliaries
         }
     ret, ns
 
@@ -159,8 +160,8 @@ let getIntfuncBodyByCons (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Commo
     let IntFullyConstraint      = lm.uper.IntFullyConstraint
     let IntSemiConstraintPos    = lm.uper.IntSemiConstraintPos
     let IntSemiConstraint       = lm.uper.IntSemiConstraint
-    let IntUnconstrained         = lm.uper.IntUnconstrained
-    let IntUnconstrainedMax      = lm.uper.IntUnconstrainedMax
+    let IntUnconstrained        = lm.uper.IntUnconstrained
+    let IntUnconstrainedMax     = lm.uper.IntUnconstrainedMax
     let IntRootExt              = lm.uper.IntRootExt
     let IntRootExt2             = lm.uper.IntRootExt2
     let rootCons = cons |> List.choose(fun x -> match x with RangeRootConstraint(_, a) |RangeRootConstraint2(_, a,_) -> Some(x) |_ -> None)
@@ -205,7 +206,7 @@ let getIntfuncBodyByCons (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Commo
             let rootBody, _,_, intEncodingType = IntBod uperR true
             IntRootExt2 pp (getValueByConstraint uperR) cc rootBody errCode.errCodeName codec, false, false, intEncodingType
         | _                             -> raise(BugErrorException "")
-    Some({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=bValIsUnReferenced; bBsIsUnReferenced=bBsIsUnReferenced; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType intEncodingType)})
+    Some({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=bValIsUnReferenced; bBsIsUnReferenced=bBsIsUnReferenced; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType intEncodingType); auxiliaries = []})
 
 
 let createIntegerFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:CommonTypes.Codec) (t:Asn1AcnAst.Asn1Type) (o:Asn1AcnAst.Integer) (typeDefinition:TypeDefinitionOrReference) (baseTypeUperFunc : UPerFunction option) (isValidFunc: IsValidFunction option) (us:State)  =
@@ -221,7 +222,7 @@ let createBooleanFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Comm
         let pp, resultExpr = adaptArgument lm codec p
         let Boolean         = lm.uper.Boolean
         let funcBodyContent = Boolean pp errCode.errCodeName codec
-        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnBooleanEncodingType None)}
+        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnBooleanEncodingType None); auxiliaries = []}
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
 
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  (fun e ns p -> Some (funcBody e ns p)) soSparkAnnotations [] us
@@ -241,7 +242,7 @@ let createRealFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:CommonT
         let castPp = castRPp lm codec (o.getClass r.args) pp
         let Real         = lm.uper.Real
         let funcBodyContent = Real castPp sSuffix errCode.errCodeName codec
-        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1RealEncodingType cls)}
+        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1RealEncodingType cls); auxiliaries = []}
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     let annots =
         match ST.lang with
@@ -258,7 +259,7 @@ let createObjectIdentifierFunction (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros) (
             else
                 lm.uper.ObjectIdentifier
         let funcBodyContent = ObjectIdentifier pp errCode.errCodeName codec
-        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some Placeholder} // TODO: Placeholder
+        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some Placeholder; auxiliaries = []} // TODO: Placeholder
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  (fun e ns p -> Some (funcBody e ns p)) soSparkAnnotations [] us
 
@@ -278,7 +279,7 @@ let createTimeTypeFunction (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros) (codec:Co
         let pp, resultExpr = adaptArgumentPtr lm codec p
         let TimeType         =  lm.uper.Time
         let funcBodyContent = TimeType pp (getTimeSubTypeByClass o.timeClass) errCode.errCodeName codec
-        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some Placeholder} // TODO: Placeholder
+        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some Placeholder; auxiliaries = []} // TODO: Placeholder
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  (fun e ns p -> Some (funcBody e ns p)) soSparkAnnotations [] us
 
@@ -287,7 +288,7 @@ let createNullTypeFunction (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros) (codec:Co
         let pp, _ = adaptArgument lm codec p
         match codec, lm.lg.decodingKind with
         | Decode, Copy ->
-            Some ({UPERFuncBodyResult.funcBody = lm.uper.Null_declare pp; errCodes = []; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=Some pp; typeEncodingKind=Some (AcnNullEncodingType None)})
+            Some ({UPERFuncBodyResult.funcBody = lm.uper.Null_declare pp; errCodes = []; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=Some pp; typeEncodingKind=Some (AcnNullEncodingType None); auxiliaries = []})
         | _ -> None
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  funcBody soSparkAnnotations [] us
@@ -313,13 +314,13 @@ let createEnumeratedFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:C
                 o.items |> List.mapi(fun i itm -> Enumerated_item pp (lm.lg.getNamedItemBackendName (Some typeDefinition) itm) (BigInteger i) nLastItemIndex codec)
             let nBits = (GetNumberOfBitsForNonNegativeInteger (nMax-nMin))
             let funcBodyContent = Enumerated pp td items nMin nMax nBits errCode.errCodeName nLastItemIndex sFirstItemName codec
-            {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType (Some (FullyConstrained (nMin, nMax))))}
+            {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType (Some (FullyConstrained (nMin, nMax)))); auxiliaries = []}
         | true ->
             let sEnumIndex = "nEnumIndex"
             let enumIndexVar = (Asn1SIntLocalVariable (sEnumIndex, None))
             let funcBodyContent = Enumerated_no_switch pp td errCode.errCodeName sEnumIndex nLastItemIndex  sFirstItemName codec
-            {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = [enumIndexVar]; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType (Some (FullyConstrained (nMin, nMax))))}
-            
+            {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = [enumIndexVar]; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (Asn1IntegerEncodingType (Some (FullyConstrained (nMin, nMax)))); auxiliaries = []}
+
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  (fun e ns p -> Some (funcBody e ns p)) soSparkAnnotations [] us
 
@@ -465,7 +466,10 @@ let createIA5StringFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Co
                 acnMaxSizeBits = nBits
                 typeKind = Some (AcnStringEncodingType o.acnEncodingClass) // TODO: Check this
             }
-            sel = pp
+            nestingScope = nestingScope
+            cs = p
+            encDec = Some internalItem
+            elemDecodeFn = None
             ixVariable = i
         }
         let sqfProofGenRes = lm.lg.generateSequenceOfLikeProof ACN (SequenceOfLike.StrType o) sqfProofGen codec
@@ -485,7 +489,7 @@ let createIA5StringFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Co
                 let localVariables = localVariables |> List.addIf (lm.lg.uper.requires_IA5String_i || o.maxSize.uper<>o.minSize.uper) lv
                 funcBodyContent, charIndex@localVariables
 
-        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnStringEncodingType o.acnEncodingClass)}
+        {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnStringEncodingType o.acnEncodingClass); auxiliaries = []}
 
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  (fun e ns p -> Some (funcBody e ns p)) soSparkAnnotations  [] us
@@ -522,7 +526,7 @@ let createOctetStringFunction_funcBody (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros
             let localVariables = localVariables |> List.addIf (lm.lg.uper.requires_IA5String_i || (not isFixedSize)) (lv)
             funcBodyContent, localVariables
 
-    {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnOctetStringEncodingType o.acnEncodingClass)}
+    {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnOctetStringEncodingType o.acnEncodingClass); auxiliaries = []}
 
 
 
@@ -568,7 +572,7 @@ let createBitStringFunction_funcBody (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros)
             let fragmentationLvars = fragmentationLvars |> List.addIf ((not isFixedSize) &&  lm.lg.uper.requires_sBLJ) (iVar)
             (funcBodyContent,fragmentationLvars)
 
-    {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnBitStringEncodingType o.acnEncodingClass)}
+    {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (AcnBitStringEncodingType o.acnEncodingClass); auxiliaries = []}
 
 
 let createBitStringFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:CommonTypes.Codec) (t:Asn1AcnAst.Asn1Type) (o:Asn1AcnAst.BitString) (typeDefinition:TypeDefinitionOrReference)  (baseTypeUperFunc : UPerFunction option) (isValidFunc: IsValidFunction option) (us:State)  =
@@ -593,7 +597,7 @@ let createSequenceOfFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:C
         match baseFuncName with
         | None ->
             let pp, resultExpr = joinedOrAsIdentifier lm codec p
-            let childNestingScope = {nestingScope with nestingLevel = nestingScope.nestingLevel + 1I}
+            let childNestingScope = {nestingScope with nestingLevel = nestingScope.nestingLevel + 1I; parents = (p, t) :: nestingScope.parents}
             let access = lm.lg.getAccess p.arg
             // `childInitExpr` is used to initialize the array of elements in which we will write their decoded values
             // It is only meaningful for "Copy" decoding kind, since InPlace will directly modify `p`'s array
@@ -613,27 +617,6 @@ let createSequenceOfFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:C
             let internalItem =
                 chFunc.funcBody childNestingScope ({p with arg = lm.lg.getArrayItem p.arg i child.isIA5String})
 
-            let sqfProofGen = {
-                SequenceOfLikeProofGen.acnOuterMaxSize = nestingScope.acnOuterMaxSize
-                uperOuterMaxSize = nestingScope.uperOuterMaxSize
-                nestingLevel = nestingScope.nestingLevel
-                nestingIx = nestingScope.nestingIx
-                acnMaxOffset = nestingScope.acnOffset
-                uperMaxOffset = nestingScope.uperOffset
-                typeInfo = {
-                    uperMaxSizeBits = child.uperMaxSizeInBits
-                    acnMaxSizeBits = child.acnMaxSizeInBits
-                    typeKind = internalItem |> Option.bind (fun i -> i.typeEncodingKind)
-                }
-                sel = pp
-                ixVariable = i
-            }
-            let sqfProofGenRes = lm.lg.generateSequenceOfLikeProof ACN (SqOf o) sqfProofGen codec
-            let preSerde = sqfProofGenRes |> Option.map (fun r -> r.preSerde)
-            let postSerde = sqfProofGenRes |> Option.map (fun r -> r.postSerde)
-            let postInc = sqfProofGenRes |> Option.map (fun r -> r.postInc)
-            let invariant = sqfProofGenRes |> Option.map (fun r -> r.invariant)
-
             let absOffset = nestingScope.uperOffset
             let remBits = nestingScope.uperOuterMaxSize - nestingScope.uperOffset
             let lvl = max 0I (nestingScope.nestingLevel - 1I)
@@ -646,11 +629,11 @@ let createSequenceOfFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:C
                 match o.minSize with
                 | _ when o.maxSize.uper < 65536I && o.maxSize.uper=o.minSize.uper  -> None
                 | _ when o.maxSize.uper < 65536I && o.maxSize.uper<>o.minSize.uper ->
-                    let funcBody = varSize pp access  td i "" o.minSize.uper o.maxSize.uper nSizeInBits child.uperMinSizeInBits nIntItemMaxSize 0I childInitExpr errCode.errCodeName absOffset remBits lvl ix offset introSnap preSerde postSerde postInc invariant codec
-                    Some ({UPERFuncBodyResult.funcBody = funcBody; errCodes = [errCode]; localVariables = lv@nStringLength; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None})
+                    let funcBody = varSize pp access  td i "" o.minSize.uper o.maxSize.uper nSizeInBits child.uperMinSizeInBits nIntItemMaxSize 0I childInitExpr errCode.errCodeName absOffset remBits lvl ix offset introSnap codec
+                    Some ({UPERFuncBodyResult.funcBody = funcBody; errCodes = [errCode]; localVariables = lv@nStringLength; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None; auxiliaries = []})
                 | _                                                ->
                     let funcBody, localVariables = handleFragmentation lm p codec errCode ii ( o.uperMaxSizeInBits) o.minSize.uper o.maxSize.uper "" nIntItemMaxSize false false
-                    Some ({UPERFuncBodyResult.funcBody = funcBody; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None})
+                    Some ({UPERFuncBodyResult.funcBody = funcBody; errCodes = [errCode]; localVariables = localVariables; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None; auxiliaries = []})
             | Some internalItem ->
                 let childErrCodes =  internalItem.errCodes
                 let internalItemBody =
@@ -662,14 +645,14 @@ let createSequenceOfFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:C
                 let ret,localVariables =
                     match o.minSize with
                     | _ when o.maxSize.uper < 65536I && o.maxSize.uper=o.minSize.uper -> fixedSize pp td i internalItemBody o.minSize.uper child.uperMinSizeInBits nIntItemMaxSize 0I childInitExpr codec, nStringLength
-                    | _ when o.maxSize.uper < 65536I && o.maxSize.uper<>o.minSize.uper -> varSize pp access  td i internalItemBody o.minSize.uper o.maxSize.uper nSizeInBits child.uperMinSizeInBits nIntItemMaxSize 0I childInitExpr errCode.errCodeName absOffset remBits lvl ix offset introSnap preSerde postSerde postInc invariant codec , nStringLength
+                    | _ when o.maxSize.uper < 65536I && o.maxSize.uper<>o.minSize.uper -> varSize pp access  td i internalItemBody o.minSize.uper o.maxSize.uper nSizeInBits child.uperMinSizeInBits nIntItemMaxSize 0I childInitExpr errCode.errCodeName absOffset remBits lvl ix offset introSnap codec, nStringLength
                     | _ -> handleFragmentation lm p codec errCode ii ( o.uperMaxSizeInBits) o.minSize.uper o.maxSize.uper internalItemBody nIntItemMaxSize false false
                 let typeEncodingKind = internalItem.typeEncodingKind |> Option.map (fun tpe -> TypeEncodingKind.SequenceOfEncodingType (tpe, o.acnEncodingClass))
-                Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childErrCodes; localVariables = lv@(localVariables@internalItem.localVariables); bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=typeEncodingKind})
+                Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childErrCodes; localVariables = lv@(localVariables@internalItem.localVariables); bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=typeEncodingKind; auxiliaries=internalItem.auxiliaries})
         | Some baseFuncName ->
             let pp, resultExpr = adaptArgumentPtr lm codec p
             let funcBodyContent =  callBaseTypeFunc lm pp baseFuncName codec
-            Some ({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None})
+            Some ({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None; auxiliaries = []})
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition baseTypeUperFunc  isValidFunc  funcBody soSparkAnnotations  [] us
 
@@ -688,6 +671,7 @@ type private SequenceChildResult = {
     resultExpr: string option
     props: SequenceChildProps
     typeEncodingKind: TypeEncodingKind option
+    auxiliaries: string list
 }
 
 let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:CommonTypes.Codec) (t:Asn1AcnAst.Asn1Type) (o:Asn1AcnAst.Sequence) (typeDefinition:TypeDefinitionOrReference) (isValidFunc: IsValidFunction option) (children:SeqChildInfo list) (us:State)  =
@@ -738,33 +722,21 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
                     nestingLevel = nestingScope.nestingLevel + 1I
                     nestingIx = nestingScope.nestingIx + s.childIx
                     uperRelativeOffset = s.uperAccBits
-                    uperOffset = nestingScope.uperOffset + s.uperAccBits}
+                    uperOffset = nestingScope.uperOffset + s.uperAccBits
+                    parents = (p, t) :: nestingScope.parents}
             let chFunc = child.Type.getUperFunction codec
-            let newArg = lm.lg.getSeqChild p.arg childName child.Type.isIA5String child.Optionality.IsSome
-            let newArg = if lm.lg.usesWrappedOptional && newArg.isOptional && codec = Encode then newArg.asLast else newArg
-            let childP = {p with arg = newArg}
+            let childSel = lm.lg.getSeqChild p.arg childName child.Type.isIA5String child.Optionality.IsSome
+            let childP =
+                let newArg = if lm.lg.usesWrappedOptional && childSel.isOptional && codec = Encode then childSel.asLast else childSel
+                {p with arg = newArg}
             let childContentResult = chFunc.funcBody childNestingScope childP
             let existVar =
                 match codec, lm.lg.decodingKind with
                 | Decode, Copy -> Some (ToC (child._c_name + "_exist"))
                 | _ -> None
-            let presenceBit =
-                let absent, present =
-                    match ST.lang with
-                    | Scala -> "false", "true"
-                    | _ -> "0", "1"
-                // please note that in decode, macro uper_sequence_presence_bit_fix
-                // calls macro uper_sequence_presence_bit (i.e. behaves like optional)
-                let seq_presence_bit_fix (value: string) =
-                    sequence_presence_bit_fix pp access childName existVar errCode.errCodeName value codec
-                match child.Optionality with
-                | None -> None
-                | Some Asn1AcnAst.AlwaysAbsent -> Some (seq_presence_bit_fix absent)
-                | Some Asn1AcnAst.AlwaysPresent -> Some (seq_presence_bit_fix present)
-                | Some (Asn1AcnAst.Optional opt) -> Some (sequence_presence_bit pp access childName existVar errCode.errCodeName codec)
 
             let typeInfo = {uperMaxSizeBits=child.uperMaxSizeInBits; acnMaxSizeBits=child.acnMaxSizeInBits; typeKind=childContentResult |> Option.bind (fun c -> c.typeEncodingKind)}
-            let props = {sel=Some (childP.arg.joined lm.lg); uperMaxOffset=s.uperAccBits; acnMaxOffset=s.acnAccBits; typeInfo=typeInfo}
+            let props = {info = Some (Asn1Child child).toAsn1AcnAst; sel=Some childSel; uperMaxOffset=s.uperAccBits; acnMaxOffset=s.acnAccBits; typeInfo=typeInfo; typeKind = Asn1AcnTypeKind.Asn1 child.Type.Kind.baseKind}
             let newAcc = {childIx=s.childIx + 1I; uperAccBits=s.uperAccBits + child.uperMaxSizeInBits; acnAccBits=s.acnAccBits + child.acnMaxSizeInBits}
 
             match childContentResult with
@@ -774,7 +746,7 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
                     match codec, lm.lg.decodingKind with
                     | Decode, Copy -> Some child.Type.initFunction.initExpression
                     | _ -> None
-                {stmt=None; resultExpr=childResultExpr; props=props; typeEncodingKind=None}, newAcc
+                {stmt=None; resultExpr=childResultExpr; props=props; typeEncodingKind=None; auxiliaries = []}, newAcc
             | Some childContent ->
                 let childBody, child_localVariables =
                     match child.Optionality with
@@ -796,7 +768,17 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
                         | Some v ->
                             let defInit= child.Type.initFunction.initByAsn1Value childP (mapValue v).kind
                             Some (sequence_default_child pp access childName childContent.funcBody existVar childContent.resultExpr childTypeDef defInit codec), childContent.localVariables
-                {stmt=Some {body=childBody; lvs=child_localVariables; errCodes=childContent.errCodes}; resultExpr=childContent.resultExpr; props=props; typeEncodingKind=childContent.typeEncodingKind}, newAcc
+                {
+                    stmt = Some {
+                        body = childBody
+                        lvs = child_localVariables
+                        errCodes = childContent.errCodes
+                    }
+                    resultExpr = childContent.resultExpr
+                    props = props
+                    typeEncodingKind = childContent.typeEncodingKind
+                    auxiliaries = childContent.auxiliaries
+                }, newAcc
 
         let presenceBits = nonAcnChildren |> List.map printPresenceBit
         let nbPresenceBits = presenceBits |> List.sumBy (fun s -> if s.IsSome then 1I else 0I)
@@ -804,10 +786,10 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
 
         let seqProofGen =
             let presenceBitsInfo = presenceBits |> List.mapi (fun i _ ->
-                {sel=None; uperMaxOffset = bigint i; acnMaxOffset = bigint i;
-                typeInfo = {uperMaxSizeBits = 1I; acnMaxSizeBits = 1I; typeKind = Some (AcnBooleanEncodingType None)};})
+                {info = None; sel=None; uperMaxOffset = bigint i; acnMaxOffset = bigint i;
+                typeInfo = {uperMaxSizeBits = 1I; acnMaxSizeBits = 1I; typeKind = Some (AcnBooleanEncodingType None)}; typeKind = Asn1AcnTypeKind.Asn1 t.Kind})
             let children = childrenStatements00 |> List.map (fun xs -> xs.props)
-            {acnOuterMaxSize = nestingScope.acnOuterMaxSize; uperOuterMaxSize = nestingScope.uperOuterMaxSize;
+            {t = t; acnOuterMaxSize = nestingScope.acnOuterMaxSize; uperOuterMaxSize = nestingScope.uperOuterMaxSize;
             nestingLevel = nestingScope.nestingLevel; nestingIx = nestingScope.nestingIx;
             uperMaxOffset = nestingScope.uperOffset; acnMaxOffset = nestingScope.acnOffset;
             acnSiblingMaxSize = nestingScope.acnSiblingMaxSize; uperSiblingMaxSize = nestingScope.uperSiblingMaxSize;
@@ -822,6 +804,7 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
         let childrenErrCodes = childrenStatements0 |> List.collect(fun s -> s.errCodes)
         let childrenResultExpr = childrenStatements00 |> List.choose(fun s -> s.resultExpr)
         let childrenTypeKindEncoding = childrenStatements00 |> List.map(fun s -> s.typeEncodingKind)
+        let childrenAuxiliaries = childrenStatements00 |> List.collect(fun s -> s.auxiliaries)
 
         // If we are Decoding with Copy decoding kind, then all children `resultExpr` must be defined as well (i.e. we must have the same number of `resultExpr` as children)
         assert (resultExpr.IsNone || childrenResultExpr.Length = nonAcnChildren.Length)
@@ -829,7 +812,7 @@ let createSequenceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Com
         let seqContent =  (childrenStatements@seqBuild) |> nestChildItems lm codec
         match seqContent with
         | None  -> None
-        | Some ret -> Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childrenErrCodes; localVariables = localVariables@childrenLocalVars; bValIsUnReferenced=false; bBsIsUnReferenced=(o.uperMaxSizeInBits = 0I); resultExpr=resultExpr; typeEncodingKind=Some (SequenceEncodingType childrenTypeKindEncoding)})
+        | Some ret -> Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childrenErrCodes; localVariables = localVariables@childrenLocalVars; bValIsUnReferenced=false; bBsIsUnReferenced=(o.uperMaxSizeInBits = 0I); resultExpr=resultExpr; typeEncodingKind=Some (SequenceEncodingType childrenTypeKindEncoding); auxiliaries=childrenAuxiliaries})
 
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
     createUperFunction r lm codec t typeDefinition None  isValidFunc  funcBody soSparkAnnotations  [] us
@@ -856,8 +839,13 @@ let createChoiceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Commo
         let acnSiblingMaxSize = children |> List.map (fun c -> c.chType.acnMaxSizeInBits) |> List.max
         let uperSiblingMaxSize = children |> List.map (fun c -> c.chType.uperMaxSizeInBits) |> List.max
 
-        let handleChild (nIndexSizeInBits: BigInteger) (i: int) (child: ChChildInfo): string * LocalVariable list * ErrorCode list * TypeEncodingKind option =
-            let childNestingScope = {nestingScope with nestingLevel = nestingScope.nestingLevel + 1I; uperSiblingMaxSize = Some uperSiblingMaxSize; acnSiblingMaxSize = Some acnSiblingMaxSize}
+        let handleChild (nIndexSizeInBits: BigInteger) (i: int) (child: ChChildInfo): string * LocalVariable list * ErrorCode list * TypeEncodingKind option * string list =
+            let childNestingScope =
+                {nestingScope with
+                    nestingLevel = nestingScope.nestingLevel + 1I
+                    uperSiblingMaxSize = Some uperSiblingMaxSize
+                    acnSiblingMaxSize = Some acnSiblingMaxSize
+                    parents = (p, t) :: nestingScope.parents}
             let chFunc = child.chType.getUperFunction codec
             let uperChildRes =
                 match lm.lg.uper.catd with
@@ -886,27 +874,28 @@ let createChoiceFunction (r:Asn1AcnAst.AstRoot) (lm:LanguageMacros) (codec:Commo
                         | Sequence _    -> uper_a.decode_empty_sequence_emptySeq childp.arg.receiverId
                         | _             -> lm.lg.createSingleLineComment "no encoding/decoding is required"
                     | true   -> lm.lg.createSingleLineComment "no encoding/decoding is required"
-                mk_choice_child childContent, [], [], None
+                mk_choice_child childContent, [], [], None, []
             | Some childContent ->
-                mk_choice_child childContent.funcBody, childContent.localVariables, childContent.errCodes, childContent.typeEncodingKind
+                mk_choice_child childContent.funcBody, childContent.localVariables, childContent.errCodes, childContent.typeEncodingKind, childContent.auxiliaries
 
         match baseFuncName with
         | None ->
             let nIndexSizeInBits = (GetNumberOfBitsForNonNegativeInteger (BigInteger (children.Length - 1)))
             let childrenContent3 = children |> List.mapi (handleChild nIndexSizeInBits)
-            let childrenContent = childrenContent3 |> List.map(fun (s,_,_,_) -> s)
-            let childrenLocalvars = childrenContent3 |> List.collect(fun (_,s,_,_) -> s)
-            let childrenErrCodes = childrenContent3 |> List.collect(fun (_,_,s,_) -> s)
-            let childrenTypeKindEncoding = childrenContent3 |> List.map(fun (_,_,_,s) -> s)
+            let childrenContent = childrenContent3 |> List.map(fun (s,_,_,_,_) -> s)
+            let childrenLocalvars = childrenContent3 |> List.collect(fun (_,s,_,_,_) -> s)
+            let childrenErrCodes = childrenContent3 |> List.collect(fun (_,_,s,_,_) -> s)
+            let childrenTypeKindEncoding = childrenContent3 |> List.map(fun (_,_,_,s, _) -> s)
+            let childrenAuxiliaries = childrenContent3 |> List.collect(fun (_,_,_,_, a) -> a)
             let introSnap = nestingScope.nestingLevel = 0I
             let pp, resultExpr = joinedOrAsIdentifier lm codec p
             let ret = choice pp (lm.lg.getAccess p.arg) childrenContent (BigInteger (children.Length - 1)) sChoiceIndexName errCode.errCodeName td nIndexSizeInBits introSnap codec
-            Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childrenErrCodes; localVariables = localVariables@childrenLocalvars; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ChoiceEncodingType childrenTypeKindEncoding)})
+            Some ({UPERFuncBodyResult.funcBody = ret; errCodes = errCode::childrenErrCodes; localVariables = localVariables@childrenLocalvars; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ChoiceEncodingType childrenTypeKindEncoding); auxiliaries=childrenAuxiliaries})
         | Some baseFuncName ->
             let pp, resultExpr = adaptArgumentPtr lm codec p
             let funcBodyContent = callBaseTypeFunc lm pp baseFuncName codec
             // TODO: Qu'est-ce que c'est que ça????
-            Some ({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None})
+            Some ({UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=None; auxiliaries=[]})
 
     let soSparkAnnotations = Some(sparkAnnotations lm (lm.lg.getLongTypedefName typeDefinition) codec)
 
@@ -933,7 +922,7 @@ let createReferenceFunction (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros) (codec:C
                             toc, Some toc
                         | _ -> str, None
                     let funcBodyContent = callBaseTypeFunc lm pp baseFncName codec
-                    Some {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ReferenceEncodingType baseTypeDefinitionName)}
+                    Some {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ReferenceEncodingType baseTypeDefinitionName); auxiliaries = []}
                 | None -> None
             createUperFunction r lm codec t typeDefinition None  isValidFunc  funcBody soSparkAnnotations [] us
         | false ->
@@ -959,6 +948,6 @@ let createReferenceFunction (r:Asn1AcnAst.AstRoot)  (lm:LanguageMacros) (codec:C
                     match opts.octOrBitStr with
                     | ContainedInOctString  -> octet_string_containing_func pp baseFncName sReqBytesForUperEncoding nBits opts.minSize.uper opts.maxSize.uper codec
                     | ContainedInBitString  -> bit_string_containing_func pp baseFncName sReqBytesForUperEncoding sReqBitForUperEncoding nBits opts.minSize.uper opts.maxSize.uper codec
-                Some {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ReferenceEncodingType baseTypeDefinitionName)}
+                Some {UPERFuncBodyResult.funcBody = funcBodyContent; errCodes = [errCode]; localVariables = []; bValIsUnReferenced=false; bBsIsUnReferenced=false; resultExpr=resultExpr; typeEncodingKind=Some (ReferenceEncodingType baseTypeDefinitionName); auxiliaries = []}
             | None -> None
         createUperFunction r lm codec t typeDefinition None  isValidFunc  funcBody soSparkAnnotations  [] us

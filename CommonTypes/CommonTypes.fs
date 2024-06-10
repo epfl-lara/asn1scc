@@ -54,11 +54,16 @@ type Selection = {
     member this.appendSelection (selectionId: string) (selTpe: SelectionType) (selOpt: bool): Selection =
         let currTpe = this.selectionType
         assert (currTpe = Value || currTpe = Pointer)
+        assert (selectionId.Trim() <> "")
         this.append (if currTpe = Value then ValueAccess (selectionId, selTpe, selOpt) else PointerAccess (selectionId, selTpe, selOpt))
 
     member this.selectionType: SelectionType =
         if this.path.IsEmpty then this.receiverType
         else (List.last this.path).selectionType
+
+    member this.dropLast: Selection =
+        if this.path.IsEmpty then this
+        else {this with path = List.initial this.path}
 
     member this.isOptional: bool =
         (not this.path.IsEmpty) &&
@@ -82,6 +87,9 @@ type Selection = {
         |PointerAccess (id, _, _) -> Selection.emptyPath id Pointer
         |ArrayAccess _ -> raise (BugErrorException "lastId on ArrayAccess")
 
+    member this.asLastOrSelf: Selection =
+        if this.path.IsEmpty then this
+        else this.asLast
 
 type UserError = {
     line : int
