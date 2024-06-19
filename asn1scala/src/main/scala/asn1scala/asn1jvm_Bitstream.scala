@@ -850,7 +850,7 @@ case class BitStream private [asn1scala](
     *  0 1 2 3 4 5 6 7
     *
     */
-   // @opaque @inlineOnce
+   @opaque @inlineOnce
    def appendBit(b: Boolean): Unit = {
       require(BitStream.validate_offset_bit(buf.length.toLong, currentByte.toLong, currentBit.toLong))
 
@@ -884,6 +884,7 @@ case class BitStream private [asn1scala](
    /**
     * Append a set bit
     */
+   @opaque @inlineOnce
    def appendBitOne(): Unit = {
       require(BitStream.validate_offset_bit(buf.length.toLong, currentByte.toLong, currentBit.toLong))
 
@@ -906,6 +907,7 @@ case class BitStream private [asn1scala](
    /**
     * Append cleared bit to bitstream
     */
+    @opaque @inlineOnce
    def appendBitZero(): Unit = {
       require(BitStream.validate_offset_bit(buf.length.toLong, currentByte.toLong, currentBit.toLong))
 
