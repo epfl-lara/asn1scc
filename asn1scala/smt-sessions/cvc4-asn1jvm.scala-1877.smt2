@@ -1,0 +1,57 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!49528 () Bool)
+
+(assert start!49528)
+
+(declare-fun res!195867 () Bool)
+
+(declare-fun e!161804 () Bool)
+
+(assert (=> start!49528 (=> (not res!195867) (not e!161804))))
+
+(declare-fun l!233 () (_ BitVec 64))
+
+(declare-fun i!785 () (_ BitVec 32))
+
+(assert (=> start!49528 (= res!195867 (and (bvsge l!233 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsge i!785 #b00000000000000000000000000000000) (bvslt i!785 #b00000000000000000000000001000000) (or (and (= i!785 #b00000000000000000000000000000000) (bvsge #b0111111111111111111111111111111111111111111111111111111111111111 l!233)) (bvsge (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub #b00000000000000000000000000111111 i!785))) l!233)) (bvslt i!785 #b00000000000000000000000000111111) (not (= l!233 #b0000000000000000000000000000000000000000000000000000000000000000)) (bvslt (bvadd #b00000000000000000000000000000001 i!785) #b00000000000000000000000000111111) (not (= (bvlshr l!233 #b0000000000000000000000000000000000000000000000000000000000000001) #b0000000000000000000000000000000000000000000000000000000000000000))))))
+
+(assert (=> start!49528 e!161804))
+
+(assert (=> start!49528 true))
+
+(declare-fun b!234137 () Bool)
+
+(declare-datatypes ((Unit!17261 0))(
+  ( (Unit!17262) )
+))
+(declare-datatypes ((tuple3!1510 0))(
+  ( (tuple3!1511 (_1!10735 Unit!17261) (_2!10735 (_ BitVec 64)) (_3!897 (_ BitVec 32))) )
+))
+(declare-fun lt!369885 () tuple3!1510)
+
+(assert (=> b!234137 (= e!161804 false)))
+
+(declare-fun GetBitCountUnsignedWhile!0 ((_ BitVec 64) (_ BitVec 32)) tuple3!1510)
+
+(assert (=> b!234137 (= lt!369885 (GetBitCountUnsignedWhile!0 (bvlshr l!233 #b0000000000000000000000000000000000000000000000000000000000000001) (bvadd #b00000000000000000000000000000001 i!785)))))
+
+(assert (= (and start!49528 res!195867) b!234137))
+
+(declare-fun m!356883 () Bool)
+
+(assert (=> b!234137 m!356883))
+
+(push 1)
+
+(assert (not b!234137))
+
+(check-sat)
+
+(pop 1)
+
+(push 1)
+
+(check-sat)
+
+(pop 1)
+

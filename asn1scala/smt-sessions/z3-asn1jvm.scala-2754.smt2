@@ -1,0 +1,96 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!66828 () Bool)
+
+(assert start!66828)
+
+(declare-fun res!246491 () Bool)
+
+(declare-fun e!214301 () Bool)
+
+(assert (=> start!66828 (=> (not res!246491) (not e!214301))))
+
+(declare-fun at!286 () (_ BitVec 64))
+
+(declare-datatypes ((array!18082 0))(
+  ( (array!18083 (arr!8930 (Array (_ BitVec 32) (_ BitVec 8))) (size!7847 (_ BitVec 32))) )
+))
+(declare-fun a!434 () array!18082)
+
+(assert (=> start!66828 (= res!246491 (and (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 at!286) (bvslt at!286 (bvmul #b0000000000000000000000000000000000000000000000000000000000001000 ((_ sign_extend 32) (size!7847 a!434))))))))
+
+(assert (=> start!66828 e!214301))
+
+(assert (=> start!66828 true))
+
+(declare-fun array_inv!7459 (array!18082) Bool)
+
+(assert (=> start!66828 (array_inv!7459 a!434)))
+
+(declare-fun b!298705 () Bool)
+
+(declare-fun e!214302 () Bool)
+
+(assert (=> b!298705 (= e!214301 e!214302)))
+
+(declare-fun res!246489 () Bool)
+
+(assert (=> b!298705 (=> (not res!246489) (not e!214302))))
+
+(declare-fun i!1010 () (_ BitVec 64))
+
+(assert (=> b!298705 (= res!246489 (and (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 i!1010) (bvsle i!1010 at!286)))))
+
+(declare-fun lt!434789 () (_ BitVec 32))
+
+(assert (=> b!298705 (= lt!434789 ((_ extract 31 0) (bvsrem at!286 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(declare-fun lt!434790 () (_ BitVec 32))
+
+(assert (=> b!298705 (= lt!434790 ((_ extract 31 0) (bvsdiv at!286 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(declare-fun b!298706 () Bool)
+
+(declare-fun res!246490 () Bool)
+
+(assert (=> b!298706 (=> (not res!246490) (not e!214302))))
+
+(declare-fun b!320 () Bool)
+
+(declare-fun arrayBitRangesEq!0 (array!18082 array!18082 (_ BitVec 64) (_ BitVec 64)) Bool)
+
+(assert (=> b!298706 (= res!246490 (arrayBitRangesEq!0 a!434 (array!18083 (store (arr!8930 a!434) lt!434790 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8930 a!434) lt!434790)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434789)))) ((_ sign_extend 24) (ite b!320 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434789) #b00000000))))) (size!7847 a!434)) i!1010 at!286))))
+
+(declare-fun b!298707 () Bool)
+
+(assert (=> b!298707 (= e!214302 (and (not (= i!1010 #b0000000000000000000000000000000000000000000000000000000000000000)) (not (= (bvand i!1010 #b1000000000000000000000000000000000000000000000000000000000000000) #b0000000000000000000000000000000000000000000000000000000000000000)) (not (= (bvand i!1010 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvsub i!1010 #b0000000000000000000000000000000000000000000000000000000000000001) #b1000000000000000000000000000000000000000000000000000000000000000)))))))
+
+(assert (= (and start!66828 res!246491) b!298705))
+
+(assert (= (and b!298705 res!246489) b!298706))
+
+(assert (= (and b!298706 res!246490) b!298707))
+
+(declare-fun m!437873 () Bool)
+
+(assert (=> start!66828 m!437873))
+
+(declare-fun m!437875 () Bool)
+
+(assert (=> b!298706 m!437875))
+
+(declare-fun m!437877 () Bool)
+
+(assert (=> b!298706 m!437877))
+
+(declare-fun m!437879 () Bool)
+
+(assert (=> b!298706 m!437879))
+
+(declare-fun m!437881 () Bool)
+
+(assert (=> b!298706 m!437881))
+
+(check-sat (not start!66828) (not b!298706))
+(check-sat)

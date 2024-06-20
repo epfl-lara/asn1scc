@@ -1,0 +1,36 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!65292 () Bool)
+
+(assert start!65292)
+
+(declare-fun nBits!523 () (_ BitVec 64))
+
+(declare-fun to!474 () (_ BitVec 64))
+
+(declare-fun from!505 () (_ BitVec 64))
+
+(declare-datatypes ((array!17440 0))(
+  ( (array!17441 (arr!8579 (Array (_ BitVec 32) (_ BitVec 8))) (size!7553 (_ BitVec 32))) )
+))
+(declare-fun arr!273 () array!17440)
+
+(assert (=> start!65292 (and (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 nBits!523) (bvsle nBits!523 #b0000000000000000000000000000001111111111111111111111111111111000) (bvsge ((_ sign_extend 32) (size!7553 arr!273)) (bvsdiv (bvadd nBits!523 #b0000000000000000000000000000000000000000000000000000000000000111) #b0000000000000000000000000000000000000000000000000000000000001000)) (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 from!505) (bvsle from!505 to!474) (bvsle to!474 nBits!523) (not (= (bvand nBits!523 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand from!505 #b1000000000000000000000000000000000000000000000000000000000000000))) (not (= (bvand nBits!523 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvsub nBits!523 from!505) #b1000000000000000000000000000000000000000000000000000000000000000))))))
+
+(assert (=> start!65292 true))
+
+(declare-fun array_inv!7165 (array!17440) Bool)
+
+(assert (=> start!65292 (array_inv!7165 arr!273)))
+
+(declare-fun bs!25276 () Bool)
+
+(assert (= bs!25276 start!65292))
+
+(declare-fun m!428487 () Bool)
+
+(assert (=> bs!25276 m!428487))
+
+(check-sat (not start!65292))
+(check-sat)

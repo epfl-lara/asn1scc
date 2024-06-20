@@ -1,0 +1,22 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!37588 () Bool)
+
+(assert start!37588)
+
+(declare-fun lt!263339 () (_ BitVec 64))
+
+(declare-fun exponentVal!1 () (_ BitVec 32))
+
+(declare-fun lt!263338 () (_ BitVec 64))
+
+(assert (=> start!37588 (= lt!263339 (bvand (bvadd ((_ sign_extend 32) exponentVal!1) lt!263338) #b1000000000000000000000000000000000000000000000000000000000000000))))
+
+(assert (=> start!37588 (= lt!263338 #b0000000000000000000000000000000000000000000000000000001111111111)))
+
+(assert (=> start!37588 (and (= lt!263339 #b0000000000000000000000000000000000000000000000000000000000000000) (not (= lt!263339 (bvand (bvadd #b0000000000000000000000000000000000000000000000000000000000110100 ((_ sign_extend 32) exponentVal!1) lt!263338) #b1000000000000000000000000000000000000000000000000000000000000000))))))
+
+(assert (=> start!37588 true))
+
+(check-sat)

@@ -1,0 +1,26 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!37528 () Bool)
+
+(assert start!37528)
+
+(declare-fun vv!44 () (_ BitVec 64))
+
+(get-info :version)
+
+(declare-datatypes ((Unit!11994 0))(
+  ( (Unit!11995) )
+))
+(declare-datatypes ((ControlFlow!95 0))(
+  ( (Return!94 (value!6979 (_ BitVec 32))) (Proceed!94 (value!6980 Unit!11994)) )
+))
+(declare-fun Unit!11996 () Unit!11994)
+
+(declare-fun Unit!11997 () Unit!11994)
+
+(assert (=> start!37528 (and (not ((_ is Return!94) (ite (bvslt vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!94 #b00000000000000000000000001000000) (Proceed!94 Unit!11996)))) (not ((_ is Return!94) (ite (= vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!94 #b00000000000000000000000000000000) (Proceed!94 Unit!11997)))) (not (= vv!44 #b0000000000000000000000000000000000000000000000000000000000000000)) (or (bvslt vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (and (bvslt #b0111111111111111111111111111111111111111111111111111111111111111 vv!44) (bvslt #b1000000000000000000000000000000000000000000000000000000000000000 vv!44))))))
+
+(assert (=> start!37528 true))
+
+(check-sat)

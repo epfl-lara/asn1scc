@@ -1,0 +1,804 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!38170 () Bool)
+
+(assert start!38170)
+
+(declare-fun b!171844 () Bool)
+
+(declare-fun e!120106 () Bool)
+
+(declare-fun e!120103 () Bool)
+
+(assert (=> b!171844 (= e!120106 e!120103)))
+
+(declare-fun res!142397 () Bool)
+
+(assert (=> b!171844 (=> (not res!142397) (not e!120103))))
+
+(declare-datatypes ((array!9199 0))(
+  ( (array!9200 (arr!4995 (Array (_ BitVec 32) (_ BitVec 8))) (size!4065 (_ BitVec 32))) )
+))
+(declare-datatypes ((BitStream!7238 0))(
+  ( (BitStream!7239 (buf!4493 array!9199) (currentByte!8530 (_ BitVec 32)) (currentBit!8525 (_ BitVec 32))) )
+))
+(declare-datatypes ((tuple2!14748 0))(
+  ( (tuple2!14749 (_1!8016 (_ BitVec 64)) (_2!8016 BitStream!7238)) )
+))
+(declare-fun lt!264797 () tuple2!14748)
+
+(declare-fun thiss!1817 () BitStream!7238)
+
+(assert (=> b!171844 (= res!142397 (= (buf!4493 (_2!8016 lt!264797)) (buf!4493 thiss!1817)))))
+
+(declare-fun nBits!575 () (_ BitVec 32))
+
+(declare-fun readNLeastSignificantBitsLoop!0 (BitStream!7238 (_ BitVec 32) (_ BitVec 32) (_ BitVec 64)) tuple2!14748)
+
+(assert (=> b!171844 (= lt!264797 (readNLeastSignificantBitsLoop!0 thiss!1817 nBits!575 #b00000000000000000000000000000000 #b0000000000000000000000000000000000000000000000000000000000000000))))
+
+(declare-fun b!171845 () Bool)
+
+(declare-fun invariant!0 ((_ BitVec 32) (_ BitVec 32) (_ BitVec 32)) Bool)
+
+(assert (=> b!171845 (= e!120103 (not (invariant!0 (currentBit!8525 (_2!8016 lt!264797)) (currentByte!8530 (_2!8016 lt!264797)) (size!4065 (buf!4493 (_2!8016 lt!264797))))))))
+
+(declare-fun b!171846 () Bool)
+
+(declare-fun e!120104 () Bool)
+
+(declare-fun array_inv!3806 (array!9199) Bool)
+
+(assert (=> b!171846 (= e!120104 (array_inv!3806 (buf!4493 thiss!1817)))))
+
+(declare-fun res!142396 () Bool)
+
+(assert (=> start!38170 (=> (not res!142396) (not e!120106))))
+
+(assert (=> start!38170 (= res!142396 (and (bvsge nBits!575 #b00000000000000000000000000000000) (bvsle nBits!575 #b00000000000000000000000001000000)))))
+
+(assert (=> start!38170 e!120106))
+
+(assert (=> start!38170 true))
+
+(declare-fun inv!12 (BitStream!7238) Bool)
+
+(assert (=> start!38170 (and (inv!12 thiss!1817) e!120104)))
+
+(declare-fun b!171843 () Bool)
+
+(declare-fun res!142398 () Bool)
+
+(assert (=> b!171843 (=> (not res!142398) (not e!120106))))
+
+(declare-fun validate_offset_bits!1 ((_ BitVec 64) (_ BitVec 64) (_ BitVec 64) (_ BitVec 64)) Bool)
+
+(assert (=> b!171843 (= res!142398 (validate_offset_bits!1 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817)) ((_ sign_extend 32) nBits!575)))))
+
+(assert (= (and start!38170 res!142396) b!171843))
+
+(assert (= (and b!171843 res!142398) b!171844))
+
+(assert (= (and b!171844 res!142397) b!171845))
+
+(assert (= start!38170 b!171846))
+
+(declare-fun m!271075 () Bool)
+
+(assert (=> start!38170 m!271075))
+
+(declare-fun m!271077 () Bool)
+
+(assert (=> b!171844 m!271077))
+
+(declare-fun m!271079 () Bool)
+
+(assert (=> b!171843 m!271079))
+
+(declare-fun m!271081 () Bool)
+
+(assert (=> b!171846 m!271081))
+
+(declare-fun m!271083 () Bool)
+
+(assert (=> b!171845 m!271083))
+
+(push 1)
+
+(assert (not b!171844))
+
+(assert (not start!38170))
+
+(assert (not b!171846))
+
+(assert (not b!171843))
+
+(assert (not b!171845))
+
+(check-sat)
+
+(pop 1)
+
+(push 1)
+
+(check-sat)
+
+(get-model)
+
+(pop 1)
+
+(declare-fun d!60899 () Bool)
+
+(assert (=> d!60899 (= (array_inv!3806 (buf!4493 thiss!1817)) (bvsge (size!4065 (buf!4493 thiss!1817)) #b00000000000000000000000000000000))))
+
+(assert (=> b!171846 d!60899))
+
+(declare-fun d!60901 () Bool)
+
+(declare-fun remainingBits!0 ((_ BitVec 64) (_ BitVec 64) (_ BitVec 64)) (_ BitVec 64))
+
+(assert (=> d!60901 (= (validate_offset_bits!1 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817)) ((_ sign_extend 32) nBits!575)) (bvsge (remainingBits!0 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817))) ((_ sign_extend 32) nBits!575)))))
+
+(declare-fun bs!15152 () Bool)
+
+(assert (= bs!15152 d!60901))
+
+(declare-fun m!271089 () Bool)
+
+(assert (=> bs!15152 m!271089))
+
+(assert (=> b!171843 d!60901))
+
+(declare-fun d!60905 () Bool)
+
+(assert (=> d!60905 (= (inv!12 thiss!1817) (invariant!0 (currentBit!8525 thiss!1817) (currentByte!8530 thiss!1817) (size!4065 (buf!4493 thiss!1817))))))
+
+(declare-fun bs!15153 () Bool)
+
+(assert (= bs!15153 d!60905))
+
+(declare-fun m!271091 () Bool)
+
+(assert (=> bs!15153 m!271091))
+
+(assert (=> start!38170 d!60905))
+
+(declare-fun d!60907 () Bool)
+
+(declare-fun e!120127 () Bool)
+
+(assert (=> d!60907 e!120127))
+
+(declare-fun res!142432 () Bool)
+
+(assert (=> d!60907 (=> (not res!142432) (not e!120127))))
+
+(declare-fun lt!264860 () tuple2!14748)
+
+(assert (=> d!60907 (= res!142432 (= (buf!4493 (_2!8016 lt!264860)) (buf!4493 thiss!1817)))))
+
+(declare-fun e!120125 () tuple2!14748)
+
+(assert (=> d!60907 (= lt!264860 e!120125)))
+
+(declare-fun c!9037 () Bool)
+
+(assert (=> d!60907 (= c!9037 (= nBits!575 #b00000000000000000000000000000000))))
+
+(assert (=> d!60907 (and (bvsle #b00000000000000000000000000000000 #b00000000000000000000000000000000) (bvsle #b00000000000000000000000000000000 nBits!575) (bvsle nBits!575 #b00000000000000000000000001000000))))
+
+(assert (=> d!60907 (= (readNLeastSignificantBitsLoop!0 thiss!1817 nBits!575 #b00000000000000000000000000000000 #b0000000000000000000000000000000000000000000000000000000000000000) lt!264860)))
+
+(declare-fun b!171889 () Bool)
+
+(assert (=> b!171889 (= e!120125 (tuple2!14749 #b0000000000000000000000000000000000000000000000000000000000000000 thiss!1817))))
+
+(declare-fun b!171890 () Bool)
+
+(declare-fun lt!264855 () tuple2!14748)
+
+(assert (=> b!171890 (= e!120125 (tuple2!14749 (_1!8016 lt!264855) (_2!8016 lt!264855)))))
+
+(declare-datatypes ((tuple2!14752 0))(
+  ( (tuple2!14753 (_1!8018 Bool) (_2!8018 BitStream!7238)) )
+))
+(declare-fun lt!264852 () tuple2!14752)
+
+(declare-fun readBit!0 (BitStream!7238) tuple2!14752)
+
+(assert (=> b!171890 (= lt!264852 (readBit!0 thiss!1817))))
+
+(assert (=> b!171890 (= lt!264855 (readNLeastSignificantBitsLoop!0 (_2!8018 lt!264852) nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) (bvor #b0000000000000000000000000000000000000000000000000000000000000000 (ite (_1!8018 lt!264852) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) #b00000000000000000000000000000000))) #b0000000000000000000000000000000000000000000000000000000000000000))))))
+
+(declare-fun b!171891 () Bool)
+
+(declare-fun res!142430 () Bool)
+
+(assert (=> b!171891 (=> (not res!142430) (not e!120127))))
+
+(declare-fun lt!264859 () (_ BitVec 64))
+
+(declare-fun lt!264857 () (_ BitVec 64))
+
+(assert (=> b!171891 (= res!142430 (= (bvlshr (_1!8016 lt!264860) lt!264857) (bvlshr #b0000000000000000000000000000000000000000000000000000000000000000 lt!264859)))))
+
+(assert (=> b!171891 (and (bvsge lt!264859 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!264859 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(assert (=> b!171891 (= lt!264859 ((_ sign_extend 32) (bvsub nBits!575 #b00000000000000000000000000000000)))))
+
+(assert (=> b!171891 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand #b00000000000000000000000000000000 #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 #b00000000000000000000000000000000) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171891 (and (bvsge lt!264857 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!264857 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(assert (=> b!171891 (= lt!264857 ((_ sign_extend 32) (bvsub nBits!575 #b00000000000000000000000000000000)))))
+
+(assert (=> b!171891 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand #b00000000000000000000000000000000 #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 #b00000000000000000000000000000000) #b10000000000000000000000000000000)))))
+
+(declare-fun lt!264854 () (_ BitVec 64))
+
+(declare-fun e!120126 () Bool)
+
+(declare-fun b!171892 () Bool)
+
+(declare-datatypes ((tuple2!14758 0))(
+  ( (tuple2!14759 (_1!8021 BitStream!7238) (_2!8021 Bool)) )
+))
+(declare-fun readBitPure!0 (BitStream!7238) tuple2!14758)
+
+(assert (=> b!171892 (= e!120126 (= (= (bvand (bvlshr (_1!8016 lt!264860) lt!264854) #b0000000000000000000000000000000000000000000000000000000000000001) #b0000000000000000000000000000000000000000000000000000000000000001) (_2!8021 (readBitPure!0 thiss!1817))))))
+
+(assert (=> b!171892 (and (bvsge lt!264854 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!264854 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(declare-fun lt!264853 () (_ BitVec 32))
+
+(assert (=> b!171892 (= lt!264854 ((_ sign_extend 32) (bvsub lt!264853 #b00000000000000000000000000000000)))))
+
+(assert (=> b!171892 (or (= (bvand lt!264853 #b10000000000000000000000000000000) (bvand #b00000000000000000000000000000000 #b10000000000000000000000000000000)) (= (bvand lt!264853 #b10000000000000000000000000000000) (bvand (bvsub lt!264853 #b00000000000000000000000000000000) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171892 (= lt!264853 (bvsub nBits!575 #b00000000000000000000000000000001))))
+
+(assert (=> b!171892 (or (= (bvand nBits!575 #b10000000000000000000000000000000) #b00000000000000000000000000000000) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 #b00000000000000000000000000000001) #b10000000000000000000000000000000)))))
+
+(declare-fun b!171893 () Bool)
+
+(declare-fun res!142431 () Bool)
+
+(assert (=> b!171893 (=> (not res!142431) (not e!120127))))
+
+(declare-fun onesLSBLong!0 ((_ BitVec 32)) (_ BitVec 64))
+
+(assert (=> b!171893 (= res!142431 (= (bvand (_1!8016 lt!264860) (onesLSBLong!0 nBits!575)) (_1!8016 lt!264860)))))
+
+(declare-fun b!171894 () Bool)
+
+(declare-fun res!142433 () Bool)
+
+(assert (=> b!171894 (=> (not res!142433) (not e!120127))))
+
+(declare-fun lt!264858 () (_ BitVec 64))
+
+(declare-fun lt!264856 () (_ BitVec 64))
+
+(declare-fun bitIndex!0 ((_ BitVec 32) (_ BitVec 32) (_ BitVec 32)) (_ BitVec 64))
+
+(assert (=> b!171894 (= res!142433 (= (bitIndex!0 (size!4065 (buf!4493 (_2!8016 lt!264860))) (currentByte!8530 (_2!8016 lt!264860)) (currentBit!8525 (_2!8016 lt!264860))) (bvadd lt!264856 lt!264858)))))
+
+(assert (=> b!171894 (or (not (= (bvand lt!264856 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand lt!264858 #b1000000000000000000000000000000000000000000000000000000000000000))) (= (bvand lt!264856 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvadd lt!264856 lt!264858) #b1000000000000000000000000000000000000000000000000000000000000000)))))
+
+(assert (=> b!171894 (= lt!264858 ((_ sign_extend 32) (bvsub nBits!575 #b00000000000000000000000000000000)))))
+
+(assert (=> b!171894 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand #b00000000000000000000000000000000 #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 #b00000000000000000000000000000000) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171894 (= lt!264856 (bitIndex!0 (size!4065 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817) (currentBit!8525 thiss!1817)))))
+
+(declare-fun b!171895 () Bool)
+
+(assert (=> b!171895 (= e!120127 e!120126)))
+
+(declare-fun res!142429 () Bool)
+
+(assert (=> b!171895 (=> res!142429 e!120126)))
+
+(assert (=> b!171895 (= res!142429 (bvsge #b00000000000000000000000000000000 nBits!575))))
+
+(assert (= (and d!60907 c!9037) b!171889))
+
+(assert (= (and d!60907 (not c!9037)) b!171890))
+
+(assert (= (and d!60907 res!142432) b!171894))
+
+(assert (= (and b!171894 res!142433) b!171891))
+
+(assert (= (and b!171891 res!142430) b!171893))
+
+(assert (= (and b!171893 res!142431) b!171895))
+
+(assert (= (and b!171895 (not res!142429)) b!171892))
+
+(declare-fun m!271093 () Bool)
+
+(assert (=> b!171890 m!271093))
+
+(declare-fun m!271095 () Bool)
+
+(assert (=> b!171890 m!271095))
+
+(declare-fun m!271097 () Bool)
+
+(assert (=> b!171892 m!271097))
+
+(declare-fun m!271099 () Bool)
+
+(assert (=> b!171893 m!271099))
+
+(declare-fun m!271101 () Bool)
+
+(assert (=> b!171894 m!271101))
+
+(declare-fun m!271103 () Bool)
+
+(assert (=> b!171894 m!271103))
+
+(assert (=> b!171844 d!60907))
+
+(declare-fun d!60909 () Bool)
+
+(assert (=> d!60909 (= (invariant!0 (currentBit!8525 (_2!8016 lt!264797)) (currentByte!8530 (_2!8016 lt!264797)) (size!4065 (buf!4493 (_2!8016 lt!264797)))) (and (bvsge (currentBit!8525 (_2!8016 lt!264797)) #b00000000000000000000000000000000) (bvslt (currentBit!8525 (_2!8016 lt!264797)) #b00000000000000000000000000001000) (bvsge (currentByte!8530 (_2!8016 lt!264797)) #b00000000000000000000000000000000) (or (bvslt (currentByte!8530 (_2!8016 lt!264797)) (size!4065 (buf!4493 (_2!8016 lt!264797)))) (and (= (currentBit!8525 (_2!8016 lt!264797)) #b00000000000000000000000000000000) (= (currentByte!8530 (_2!8016 lt!264797)) (size!4065 (buf!4493 (_2!8016 lt!264797))))))))))
+
+(assert (=> b!171845 d!60909))
+
+(push 1)
+
+(assert (not d!60901))
+
+(assert (not b!171892))
+
+(assert (not d!60905))
+
+(assert (not b!171893))
+
+(assert (not b!171894))
+
+(assert (not b!171890))
+
+(check-sat)
+
+(pop 1)
+
+(push 1)
+
+(check-sat)
+
+(get-model)
+
+(pop 1)
+
+(declare-fun d!60939 () Bool)
+
+(assert (=> d!60939 (= (remainingBits!0 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817))) (bvsub (bvmul ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) #b0000000000000000000000000000000000000000000000000000000000001000) (bvadd (bvmul ((_ sign_extend 32) (currentByte!8530 thiss!1817)) #b0000000000000000000000000000000000000000000000000000000000001000) ((_ sign_extend 32) (currentBit!8525 thiss!1817)))))))
+
+(assert (=> d!60901 d!60939))
+
+(declare-fun d!60941 () Bool)
+
+(declare-fun e!120154 () Bool)
+
+(assert (=> d!60941 e!120154))
+
+(declare-fun res!142464 () Bool)
+
+(assert (=> d!60941 (=> (not res!142464) (not e!120154))))
+
+(declare-fun lt!264952 () (_ BitVec 64))
+
+(declare-fun lt!264951 () (_ BitVec 64))
+
+(declare-fun lt!264950 () (_ BitVec 64))
+
+(assert (=> d!60941 (= res!142464 (= lt!264952 (bvsub lt!264950 lt!264951)))))
+
+(assert (=> d!60941 (or (= (bvand lt!264950 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand lt!264951 #b1000000000000000000000000000000000000000000000000000000000000000)) (= (bvand lt!264950 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvsub lt!264950 lt!264951) #b1000000000000000000000000000000000000000000000000000000000000000)))))
+
+(assert (=> d!60941 (= lt!264951 (remainingBits!0 ((_ sign_extend 32) (size!4065 (buf!4493 (_2!8016 lt!264860)))) ((_ sign_extend 32) (currentByte!8530 (_2!8016 lt!264860))) ((_ sign_extend 32) (currentBit!8525 (_2!8016 lt!264860)))))))
+
+(declare-fun lt!264948 () (_ BitVec 64))
+
+(declare-fun lt!264949 () (_ BitVec 64))
+
+(assert (=> d!60941 (= lt!264950 (bvmul lt!264948 lt!264949))))
+
+(assert (=> d!60941 (or (= lt!264948 #b0000000000000000000000000000000000000000000000000000000000000000) (= lt!264949 (bvsdiv (bvmul lt!264948 lt!264949) lt!264948)))))
+
+(assert (=> d!60941 (= lt!264949 #b0000000000000000000000000000000000000000000000000000000000001000)))
+
+(assert (=> d!60941 (= lt!264948 ((_ sign_extend 32) (size!4065 (buf!4493 (_2!8016 lt!264860)))))))
+
+(assert (=> d!60941 (= lt!264952 (bvadd (bvmul ((_ sign_extend 32) (currentByte!8530 (_2!8016 lt!264860))) #b0000000000000000000000000000000000000000000000000000000000001000) ((_ sign_extend 32) (currentBit!8525 (_2!8016 lt!264860)))))))
+
+(assert (=> d!60941 (invariant!0 (currentBit!8525 (_2!8016 lt!264860)) (currentByte!8530 (_2!8016 lt!264860)) (size!4065 (buf!4493 (_2!8016 lt!264860))))))
+
+(assert (=> d!60941 (= (bitIndex!0 (size!4065 (buf!4493 (_2!8016 lt!264860))) (currentByte!8530 (_2!8016 lt!264860)) (currentBit!8525 (_2!8016 lt!264860))) lt!264952)))
+
+(declare-fun b!171932 () Bool)
+
+(declare-fun res!142465 () Bool)
+
+(assert (=> b!171932 (=> (not res!142465) (not e!120154))))
+
+(assert (=> b!171932 (= res!142465 (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 lt!264952))))
+
+(declare-fun b!171933 () Bool)
+
+(declare-fun lt!264953 () (_ BitVec 64))
+
+(assert (=> b!171933 (= e!120154 (bvsle lt!264952 (bvmul lt!264953 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(assert (=> b!171933 (or (= lt!264953 #b0000000000000000000000000000000000000000000000000000000000000000) (= #b0000000000000000000000000000000000000000000000000000000000001000 (bvsdiv (bvmul lt!264953 #b0000000000000000000000000000000000000000000000000000000000001000) lt!264953)))))
+
+(assert (=> b!171933 (= lt!264953 ((_ sign_extend 32) (size!4065 (buf!4493 (_2!8016 lt!264860)))))))
+
+(assert (= (and d!60941 res!142464) b!171932))
+
+(assert (= (and b!171932 res!142465) b!171933))
+
+(declare-fun m!271157 () Bool)
+
+(assert (=> d!60941 m!271157))
+
+(declare-fun m!271159 () Bool)
+
+(assert (=> d!60941 m!271159))
+
+(assert (=> b!171894 d!60941))
+
+(declare-fun d!60943 () Bool)
+
+(declare-fun e!120155 () Bool)
+
+(assert (=> d!60943 e!120155))
+
+(declare-fun res!142466 () Bool)
+
+(assert (=> d!60943 (=> (not res!142466) (not e!120155))))
+
+(declare-fun lt!264958 () (_ BitVec 64))
+
+(declare-fun lt!264956 () (_ BitVec 64))
+
+(declare-fun lt!264957 () (_ BitVec 64))
+
+(assert (=> d!60943 (= res!142466 (= lt!264958 (bvsub lt!264956 lt!264957)))))
+
+(assert (=> d!60943 (or (= (bvand lt!264956 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand lt!264957 #b1000000000000000000000000000000000000000000000000000000000000000)) (= (bvand lt!264956 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvsub lt!264956 lt!264957) #b1000000000000000000000000000000000000000000000000000000000000000)))))
+
+(assert (=> d!60943 (= lt!264957 (remainingBits!0 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817))))))
+
+(declare-fun lt!264954 () (_ BitVec 64))
+
+(declare-fun lt!264955 () (_ BitVec 64))
+
+(assert (=> d!60943 (= lt!264956 (bvmul lt!264954 lt!264955))))
+
+(assert (=> d!60943 (or (= lt!264954 #b0000000000000000000000000000000000000000000000000000000000000000) (= lt!264955 (bvsdiv (bvmul lt!264954 lt!264955) lt!264954)))))
+
+(assert (=> d!60943 (= lt!264955 #b0000000000000000000000000000000000000000000000000000000000001000)))
+
+(assert (=> d!60943 (= lt!264954 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))))))
+
+(assert (=> d!60943 (= lt!264958 (bvadd (bvmul ((_ sign_extend 32) (currentByte!8530 thiss!1817)) #b0000000000000000000000000000000000000000000000000000000000001000) ((_ sign_extend 32) (currentBit!8525 thiss!1817))))))
+
+(assert (=> d!60943 (invariant!0 (currentBit!8525 thiss!1817) (currentByte!8530 thiss!1817) (size!4065 (buf!4493 thiss!1817)))))
+
+(assert (=> d!60943 (= (bitIndex!0 (size!4065 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817) (currentBit!8525 thiss!1817)) lt!264958)))
+
+(declare-fun b!171934 () Bool)
+
+(declare-fun res!142467 () Bool)
+
+(assert (=> b!171934 (=> (not res!142467) (not e!120155))))
+
+(assert (=> b!171934 (= res!142467 (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 lt!264958))))
+
+(declare-fun b!171935 () Bool)
+
+(declare-fun lt!264959 () (_ BitVec 64))
+
+(assert (=> b!171935 (= e!120155 (bvsle lt!264958 (bvmul lt!264959 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(assert (=> b!171935 (or (= lt!264959 #b0000000000000000000000000000000000000000000000000000000000000000) (= #b0000000000000000000000000000000000000000000000000000000000001000 (bvsdiv (bvmul lt!264959 #b0000000000000000000000000000000000000000000000000000000000001000) lt!264959)))))
+
+(assert (=> b!171935 (= lt!264959 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))))))
+
+(assert (= (and d!60943 res!142466) b!171934))
+
+(assert (= (and b!171934 res!142467) b!171935))
+
+(assert (=> d!60943 m!271089))
+
+(assert (=> d!60943 m!271091))
+
+(assert (=> b!171894 d!60943))
+
+(declare-fun d!60945 () Bool)
+
+(declare-fun e!120168 () Bool)
+
+(assert (=> d!60945 e!120168))
+
+(declare-fun res!142478 () Bool)
+
+(assert (=> d!60945 (=> (not res!142478) (not e!120168))))
+
+(declare-datatypes ((Unit!12303 0))(
+  ( (Unit!12304) )
+))
+(declare-datatypes ((tuple2!14766 0))(
+  ( (tuple2!14767 (_1!8025 Unit!12303) (_2!8025 BitStream!7238)) )
+))
+(declare-fun increaseBitIndex!0 (BitStream!7238) tuple2!14766)
+
+(assert (=> d!60945 (= res!142478 (= (buf!4493 (_2!8025 (increaseBitIndex!0 thiss!1817))) (buf!4493 thiss!1817)))))
+
+(declare-fun lt!265007 () Bool)
+
+(assert (=> d!60945 (= lt!265007 (not (= (bvand ((_ sign_extend 24) (select (arr!4995 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817))) ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) (currentBit!8525 thiss!1817)))) #b00000000000000000000000000000000)))))
+
+(declare-fun lt!265009 () tuple2!14752)
+
+(assert (=> d!60945 (= lt!265009 (tuple2!14753 (not (= (bvand ((_ sign_extend 24) (select (arr!4995 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817))) ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) (currentBit!8525 thiss!1817)))) #b00000000000000000000000000000000)) (_2!8025 (increaseBitIndex!0 thiss!1817))))))
+
+(declare-fun validate_offset_bit!0 ((_ BitVec 64) (_ BitVec 64) (_ BitVec 64)) Bool)
+
+(assert (=> d!60945 (validate_offset_bit!0 ((_ sign_extend 32) (size!4065 (buf!4493 thiss!1817))) ((_ sign_extend 32) (currentByte!8530 thiss!1817)) ((_ sign_extend 32) (currentBit!8525 thiss!1817)))))
+
+(assert (=> d!60945 (= (readBit!0 thiss!1817) lt!265009)))
+
+(declare-fun lt!265005 () (_ BitVec 64))
+
+(declare-fun b!171948 () Bool)
+
+(declare-fun lt!265010 () (_ BitVec 64))
+
+(assert (=> b!171948 (= e!120168 (= (bitIndex!0 (size!4065 (buf!4493 (_2!8025 (increaseBitIndex!0 thiss!1817)))) (currentByte!8530 (_2!8025 (increaseBitIndex!0 thiss!1817))) (currentBit!8525 (_2!8025 (increaseBitIndex!0 thiss!1817)))) (bvadd lt!265005 lt!265010)))))
+
+(assert (=> b!171948 (or (not (= (bvand lt!265005 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand lt!265010 #b1000000000000000000000000000000000000000000000000000000000000000))) (= (bvand lt!265005 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvadd lt!265005 lt!265010) #b1000000000000000000000000000000000000000000000000000000000000000)))))
+
+(assert (=> b!171948 (= lt!265010 #b0000000000000000000000000000000000000000000000000000000000000001)))
+
+(assert (=> b!171948 (= lt!265005 (bitIndex!0 (size!4065 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817) (currentBit!8525 thiss!1817)))))
+
+(declare-fun lt!265008 () Bool)
+
+(assert (=> b!171948 (= lt!265008 (not (= (bvand ((_ sign_extend 24) (select (arr!4995 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817))) ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) (currentBit!8525 thiss!1817)))) #b00000000000000000000000000000000)))))
+
+(declare-fun lt!265004 () Bool)
+
+(assert (=> b!171948 (= lt!265004 (not (= (bvand ((_ sign_extend 24) (select (arr!4995 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817))) ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) (currentBit!8525 thiss!1817)))) #b00000000000000000000000000000000)))))
+
+(declare-fun lt!265006 () Bool)
+
+(assert (=> b!171948 (= lt!265006 (not (= (bvand ((_ sign_extend 24) (select (arr!4995 (buf!4493 thiss!1817)) (currentByte!8530 thiss!1817))) ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) (currentBit!8525 thiss!1817)))) #b00000000000000000000000000000000)))))
+
+(assert (= (and d!60945 res!142478) b!171948))
+
+(declare-fun m!271181 () Bool)
+
+(assert (=> d!60945 m!271181))
+
+(declare-fun m!271183 () Bool)
+
+(assert (=> d!60945 m!271183))
+
+(declare-fun m!271185 () Bool)
+
+(assert (=> d!60945 m!271185))
+
+(declare-fun m!271187 () Bool)
+
+(assert (=> d!60945 m!271187))
+
+(assert (=> b!171948 m!271185))
+
+(assert (=> b!171948 m!271181))
+
+(assert (=> b!171948 m!271103))
+
+(assert (=> b!171948 m!271183))
+
+(declare-fun m!271189 () Bool)
+
+(assert (=> b!171948 m!271189))
+
+(assert (=> b!171890 d!60945))
+
+(declare-fun d!60951 () Bool)
+
+(declare-fun e!120171 () Bool)
+
+(assert (=> d!60951 e!120171))
+
+(declare-fun res!142482 () Bool)
+
+(assert (=> d!60951 (=> (not res!142482) (not e!120171))))
+
+(declare-fun lt!265019 () tuple2!14748)
+
+(assert (=> d!60951 (= res!142482 (= (buf!4493 (_2!8016 lt!265019)) (buf!4493 (_2!8018 lt!264852))))))
+
+(declare-fun e!120169 () tuple2!14748)
+
+(assert (=> d!60951 (= lt!265019 e!120169)))
+
+(declare-fun c!9042 () Bool)
+
+(assert (=> d!60951 (= c!9042 (= nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)))))
+
+(assert (=> d!60951 (and (bvsle #b00000000000000000000000000000000 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)) (bvsle (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) nBits!575) (bvsle nBits!575 #b00000000000000000000000001000000))))
+
+(assert (=> d!60951 (= (readNLeastSignificantBitsLoop!0 (_2!8018 lt!264852) nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) (bvor #b0000000000000000000000000000000000000000000000000000000000000000 (ite (_1!8018 lt!264852) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) #b00000000000000000000000000000000))) #b0000000000000000000000000000000000000000000000000000000000000000))) lt!265019)))
+
+(declare-fun b!171949 () Bool)
+
+(assert (=> b!171949 (= e!120169 (tuple2!14749 (bvor #b0000000000000000000000000000000000000000000000000000000000000000 (ite (_1!8018 lt!264852) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) #b00000000000000000000000000000000))) #b0000000000000000000000000000000000000000000000000000000000000000)) (_2!8018 lt!264852)))))
+
+(declare-fun b!171950 () Bool)
+
+(declare-fun lt!265014 () tuple2!14748)
+
+(assert (=> b!171950 (= e!120169 (tuple2!14749 (_1!8016 lt!265014) (_2!8016 lt!265014)))))
+
+(declare-fun lt!265011 () tuple2!14752)
+
+(assert (=> b!171950 (= lt!265011 (readBit!0 (_2!8018 lt!264852)))))
+
+(assert (=> b!171950 (= lt!265014 (readNLeastSignificantBitsLoop!0 (_2!8018 lt!265011) nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001 #b00000000000000000000000000000001) (bvor (bvor #b0000000000000000000000000000000000000000000000000000000000000000 (ite (_1!8018 lt!264852) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) #b00000000000000000000000000000000))) #b0000000000000000000000000000000000000000000000000000000000000000)) (ite (_1!8018 lt!265011) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)))) #b0000000000000000000000000000000000000000000000000000000000000000))))))
+
+(declare-fun b!171951 () Bool)
+
+(declare-fun res!142480 () Bool)
+
+(assert (=> b!171951 (=> (not res!142480) (not e!120171))))
+
+(declare-fun lt!265018 () (_ BitVec 64))
+
+(declare-fun lt!265016 () (_ BitVec 64))
+
+(assert (=> b!171951 (= res!142480 (= (bvlshr (_1!8016 lt!265019) lt!265016) (bvlshr (bvor #b0000000000000000000000000000000000000000000000000000000000000000 (ite (_1!8018 lt!264852) (bvshl #b0000000000000000000000000000000000000000000000000000000000000001 ((_ sign_extend 32) (bvsub (bvsub nBits!575 #b00000000000000000000000000000001) #b00000000000000000000000000000000))) #b0000000000000000000000000000000000000000000000000000000000000000)) lt!265018)))))
+
+(assert (=> b!171951 (and (bvsge lt!265018 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!265018 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(assert (=> b!171951 (= lt!265018 ((_ sign_extend 32) (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001))))))
+
+(assert (=> b!171951 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171951 (and (bvsge lt!265016 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!265016 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(assert (=> b!171951 (= lt!265016 ((_ sign_extend 32) (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001))))))
+
+(assert (=> b!171951 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)) #b10000000000000000000000000000000)))))
+
+(declare-fun e!120170 () Bool)
+
+(declare-fun b!171952 () Bool)
+
+(declare-fun lt!265013 () (_ BitVec 64))
+
+(assert (=> b!171952 (= e!120170 (= (= (bvand (bvlshr (_1!8016 lt!265019) lt!265013) #b0000000000000000000000000000000000000000000000000000000000000001) #b0000000000000000000000000000000000000000000000000000000000000001) (_2!8021 (readBitPure!0 (_2!8018 lt!264852)))))))
+
+(assert (=> b!171952 (and (bvsge lt!265013 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsle lt!265013 #b0000000000000000000000000000000000000000000000000000000001000000))))
+
+(declare-fun lt!265012 () (_ BitVec 32))
+
+(assert (=> b!171952 (= lt!265013 ((_ sign_extend 32) (bvsub lt!265012 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001))))))
+
+(assert (=> b!171952 (or (= (bvand lt!265012 #b10000000000000000000000000000000) (bvand (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) #b10000000000000000000000000000000)) (= (bvand lt!265012 #b10000000000000000000000000000000) (bvand (bvsub lt!265012 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171952 (= lt!265012 (bvsub nBits!575 #b00000000000000000000000000000001))))
+
+(assert (=> b!171952 (or (= (bvand nBits!575 #b10000000000000000000000000000000) #b00000000000000000000000000000000) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 #b00000000000000000000000000000001) #b10000000000000000000000000000000)))))
+
+(declare-fun b!171953 () Bool)
+
+(declare-fun res!142481 () Bool)
+
+(assert (=> b!171953 (=> (not res!142481) (not e!120171))))
+
+(assert (=> b!171953 (= res!142481 (= (bvand (_1!8016 lt!265019) (onesLSBLong!0 nBits!575)) (_1!8016 lt!265019)))))
+
+(declare-fun b!171954 () Bool)
+
+(declare-fun res!142483 () Bool)
+
+(assert (=> b!171954 (=> (not res!142483) (not e!120171))))
+
+(declare-fun lt!265015 () (_ BitVec 64))
+
+(declare-fun lt!265017 () (_ BitVec 64))
+
+(assert (=> b!171954 (= res!142483 (= (bitIndex!0 (size!4065 (buf!4493 (_2!8016 lt!265019))) (currentByte!8530 (_2!8016 lt!265019)) (currentBit!8525 (_2!8016 lt!265019))) (bvadd lt!265015 lt!265017)))))
+
+(assert (=> b!171954 (or (not (= (bvand lt!265015 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand lt!265017 #b1000000000000000000000000000000000000000000000000000000000000000))) (= (bvand lt!265015 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvadd lt!265015 lt!265017) #b1000000000000000000000000000000000000000000000000000000000000000)))))
+
+(assert (=> b!171954 (= lt!265017 ((_ sign_extend 32) (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001))))))
+
+(assert (=> b!171954 (or (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) #b10000000000000000000000000000000)) (= (bvand nBits!575 #b10000000000000000000000000000000) (bvand (bvsub nBits!575 (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001)) #b10000000000000000000000000000000)))))
+
+(assert (=> b!171954 (= lt!265015 (bitIndex!0 (size!4065 (buf!4493 (_2!8018 lt!264852))) (currentByte!8530 (_2!8018 lt!264852)) (currentBit!8525 (_2!8018 lt!264852))))))
+
+(declare-fun b!171955 () Bool)
+
+(assert (=> b!171955 (= e!120171 e!120170)))
+
+(declare-fun res!142479 () Bool)
+
+(assert (=> b!171955 (=> res!142479 e!120170)))
+
+(assert (=> b!171955 (= res!142479 (bvsge (bvadd #b00000000000000000000000000000000 #b00000000000000000000000000000001) nBits!575))))
+
+(assert (= (and d!60951 c!9042) b!171949))
+
+(assert (= (and d!60951 (not c!9042)) b!171950))
+
+(assert (= (and d!60951 res!142482) b!171954))
+
+(assert (= (and b!171954 res!142483) b!171951))
+
+(assert (= (and b!171951 res!142480) b!171953))
+
+(assert (= (and b!171953 res!142481) b!171955))
+
+(assert (= (and b!171955 (not res!142479)) b!171952))
+
+(declare-fun m!271191 () Bool)
+
+(assert (=> b!171950 m!271191))
+
+(declare-fun m!271193 () Bool)
+
+(assert (=> b!171950 m!271193))
+
+(declare-fun m!271195 () Bool)
+
+(assert (=> b!171952 m!271195))
+
+(assert (=> b!171953 m!271099))
+
+(declare-fun m!271197 () Bool)
+
+(assert (=> b!171954 m!271197))
+
+(declare-fun m!271199 () Bool)
+
+(assert (=> b!171954 m!271199))
+
+(assert (=> b!171890 d!60951))
+
+(declare-fun d!60953 () Bool)
+
+(declare-fun lt!265046 () tuple2!14752)
+
+(assert (=> d!60953 (= lt!265046 (readBit!0 thiss!1817))))
+
+(assert (=> d!60953 (= (readBitPure!0 thiss!1817) (tuple2!14759 (_2!8018 lt!265046) (_1!8018 lt!265046)))))
+
+(declare-fun bs!15157 () Bool)
+
+(assert (= bs!15157 d!60953))
+
+(assert (=> bs!15157 m!271093))
+
+(assert (=> b!171892 d!60953))
+
+(declare-fun d!60957 () Bool)
+
+(assert (=> d!60957 (= (invariant!0 (currentBit!8525 thiss!1817) (currentByte!8530 thiss!1817) (size!4065 (buf!4493 thiss!1817))) (and (bvsge (currentBit!8525 thiss!1817) #b00000000000000000000000000000000) (bvslt (currentBit!8525 thiss!1817) #b00000000000000000000000000001000) (bvsge (currentByte!8530 thiss!1817) #b00000000000000000000000000000000) (or (bvslt (currentByte!8530 thiss!1817) (size!4065 (buf!4493 thiss!1817))) (and (= (currentBit!8525 thiss!1817) #b00000000000000000000000000000000) (= (currentByte!8530 thiss!1817) (size!4065 (buf!4493 thiss!1817)))))))))
+
+(assert (=> d!60905 d!60957))
+
+(declare-fun d!60961 () Bool)
+
+(assert (=> d!60961 (= (onesLSBLong!0 nBits!575) (bvlshr #b1111111111111111111111111111111111111111111111111111111111111111 ((_ sign_extend 32) (bvsub #b00000000000000000000000001000000 nBits!575))))))
+
+(assert (=> b!171893 d!60961))
+
+(push 1)
+

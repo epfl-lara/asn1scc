@@ -1,0 +1,14 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!74028 () Bool)
+
+(assert start!74028)
+
+(declare-fun nBits!261 () (_ BitVec 32))
+
+(assert (=> start!74028 (and (bvsle #b00000000000000000000000000000000 nBits!261) (bvsle nBits!261 #b00000000000000000000000001000000) (not (= nBits!261 #b00000000000000000000000000000000)) (let ((bdg!18969 ((_ sign_extend 32) (bvsub #b00000000000000000000000001000000 nBits!261)))) (or (bvslt bdg!18969 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsgt bdg!18969 #b0000000000000000000000000000000000000000000000000000000001000000))))))
+
+(assert (=> start!74028 true))
+
+(check-sat)

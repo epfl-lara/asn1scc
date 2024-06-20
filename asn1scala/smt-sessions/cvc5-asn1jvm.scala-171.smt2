@@ -1,0 +1,17 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!3800 () Bool)
+
+(assert start!3800)
+
+(declare-fun i!803 () (_ BitVec 32))
+
+(assert (=> start!3800 (and (bvsge i!803 #b00000000000000000000000000000001) (bvsle i!803 #b00000000000000000000000001000000) (bvsge i!803 #b00000000000000000000000000000010) (not (= (bvand i!803 #b10000000000000000000000000000000) #b00000000000000000000000000000000)) (not (= (bvand i!803 #b10000000000000000000000000000000) (bvand (bvsub i!803 #b00000000000000000000000000000010) #b10000000000000000000000000000000))))))
+
+(assert (=> start!3800 true))
+
+(push 1)
+
+(check-sat)
+
+(pop 1)
+

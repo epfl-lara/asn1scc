@@ -1,0 +1,14 @@
+; Options: -in -smt2
+(set-option :produce-unsat-assumptions true)
+
+(declare-fun start!38098 () Bool)
+
+(assert start!38098)
+
+(declare-fun i!510 () (_ BitVec 32))
+
+(assert (=> start!38098 (and (bvsge i!510 #b00000000000000000000000000000000) (bvsle i!510 #b00000000000000000000000000010100) (bvslt i!510 #b00000000000000000000000000010100) (bvsge (bvadd #b00000000000000000000000000000001 i!510) #b00000000000000000000000000010100) (bvslt (bvadd #b00000000000000000000000000000001 i!510) #b00000000000000000000000000000000))))
+
+(assert (=> start!38098 true))
+
+(check-sat)

@@ -1,0 +1,239 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!66758 () Bool)
+
+(assert start!66758)
+
+(declare-fun res!246194 () Bool)
+
+(declare-fun e!213978 () Bool)
+
+(assert (=> start!66758 (=> (not res!246194) (not e!213978))))
+
+(declare-fun at!281 () (_ BitVec 64))
+
+(declare-datatypes ((array!18021 0))(
+  ( (array!18022 (arr!8901 (Array (_ BitVec 32) (_ BitVec 8))) (size!7818 (_ BitVec 32))) )
+))
+(declare-fun a!429 () array!18021)
+
+(assert (=> start!66758 (= res!246194 (and (bvsle #b0000000000000000000000000000000000000000000000000000000000000000 at!281) (bvslt at!281 (bvmul #b0000000000000000000000000000000000000000000000000000000000001000 ((_ sign_extend 32) (size!7818 a!429))))))))
+
+(assert (=> start!66758 e!213978))
+
+(assert (=> start!66758 true))
+
+(declare-fun array_inv!7430 (array!18021) Bool)
+
+(assert (=> start!66758 (array_inv!7430 a!429)))
+
+(declare-fun lt!434525 () (_ BitVec 32))
+
+(declare-fun b!298392 () Bool)
+
+(declare-fun b!315 () Bool)
+
+(declare-fun lt!434526 () (_ BitVec 32))
+
+(declare-fun arrayBitRangesEq!0 (array!18021 array!18021 (_ BitVec 64) (_ BitVec 64)) Bool)
+
+(assert (=> b!298392 (= e!213978 (not (arrayBitRangesEq!0 a!429 (array!18022 (store (arr!8901 a!429) lt!434525 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8901 a!429) lt!434525)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526)))) ((_ sign_extend 24) (ite b!315 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526) #b00000000))))) (size!7818 a!429)) at!281 at!281)))))
+
+(assert (=> b!298392 (= lt!434526 ((_ extract 31 0) (bvsrem at!281 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(assert (=> b!298392 (= lt!434525 ((_ extract 31 0) (bvsdiv at!281 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(assert (= (and start!66758 res!246194) b!298392))
+
+(declare-fun m!437517 () Bool)
+
+(assert (=> start!66758 m!437517))
+
+(declare-fun m!437519 () Bool)
+
+(assert (=> b!298392 m!437519))
+
+(declare-fun m!437521 () Bool)
+
+(assert (=> b!298392 m!437521))
+
+(declare-fun m!437523 () Bool)
+
+(assert (=> b!298392 m!437523))
+
+(declare-fun m!437525 () Bool)
+
+(assert (=> b!298392 m!437525))
+
+(push 1)
+
+(assert (not start!66758))
+
+(assert (not b!298392))
+
+(check-sat)
+
+(pop 1)
+
+(push 1)
+
+(check-sat)
+
+(get-model)
+
+(pop 1)
+
+(declare-fun d!100474 () Bool)
+
+(assert (=> d!100474 (= (array_inv!7430 a!429) (bvsge (size!7818 a!429) #b00000000000000000000000000000000))))
+
+(assert (=> start!66758 d!100474))
+
+(declare-fun d!100476 () Bool)
+
+(declare-fun res!246238 () Bool)
+
+(declare-fun e!214031 () Bool)
+
+(assert (=> d!100476 (=> res!246238 e!214031)))
+
+(assert (=> d!100476 (= res!246238 (bvsge at!281 at!281))))
+
+(assert (=> d!100476 (= (arrayBitRangesEq!0 a!429 (array!18022 (store (arr!8901 a!429) lt!434525 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8901 a!429) lt!434525)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526)))) ((_ sign_extend 24) (ite b!315 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526) #b00000000))))) (size!7818 a!429)) at!281 at!281) e!214031)))
+
+(declare-fun lt!434552 () (_ BitVec 32))
+
+(declare-fun b!298449 () Bool)
+
+(declare-datatypes ((tuple4!946 0))(
+  ( (tuple4!947 (_1!13128 (_ BitVec 32)) (_2!13128 (_ BitVec 32)) (_3!1430 (_ BitVec 32)) (_4!473 (_ BitVec 32))) )
+))
+(declare-fun lt!434553 () tuple4!946)
+
+(declare-fun e!214032 () Bool)
+
+(declare-fun byteRangesEq!0 ((_ BitVec 8) (_ BitVec 8) (_ BitVec 32) (_ BitVec 32)) Bool)
+
+(assert (=> b!298449 (= e!214032 (byteRangesEq!0 (select (arr!8901 a!429) (_4!473 lt!434553)) (select (arr!8901 (array!18022 (store (arr!8901 a!429) lt!434525 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8901 a!429) lt!434525)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526)))) ((_ sign_extend 24) (ite b!315 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526) #b00000000))))) (size!7818 a!429))) (_4!473 lt!434553)) #b00000000000000000000000000000000 lt!434552))))
+
+(declare-fun b!298450 () Bool)
+
+(declare-fun e!214027 () Bool)
+
+(declare-fun arrayRangesEq!1530 (array!18021 array!18021 (_ BitVec 32) (_ BitVec 32)) Bool)
+
+(assert (=> b!298450 (= e!214027 (arrayRangesEq!1530 a!429 (array!18022 (store (arr!8901 a!429) lt!434525 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8901 a!429) lt!434525)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526)))) ((_ sign_extend 24) (ite b!315 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526) #b00000000))))) (size!7818 a!429)) (_1!13128 lt!434553) (_2!13128 lt!434553)))))
+
+(declare-fun b!298451 () Bool)
+
+(declare-fun e!214030 () Bool)
+
+(declare-fun e!214029 () Bool)
+
+(assert (=> b!298451 (= e!214030 e!214029)))
+
+(declare-fun res!246237 () Bool)
+
+(declare-fun call!5300 () Bool)
+
+(assert (=> b!298451 (= res!246237 call!5300)))
+
+(assert (=> b!298451 (=> (not res!246237) (not e!214029))))
+
+(declare-fun b!298452 () Bool)
+
+(declare-fun e!214028 () Bool)
+
+(assert (=> b!298452 (= e!214031 e!214028)))
+
+(declare-fun res!246236 () Bool)
+
+(assert (=> b!298452 (=> (not res!246236) (not e!214028))))
+
+(assert (=> b!298452 (= res!246236 e!214027)))
+
+(declare-fun res!246235 () Bool)
+
+(assert (=> b!298452 (=> res!246235 e!214027)))
+
+(assert (=> b!298452 (= res!246235 (bvsge (_1!13128 lt!434553) (_2!13128 lt!434553)))))
+
+(assert (=> b!298452 (= lt!434552 ((_ extract 31 0) (bvsrem at!281 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(declare-fun lt!434551 () (_ BitVec 32))
+
+(assert (=> b!298452 (= lt!434551 ((_ extract 31 0) (bvsrem at!281 #b0000000000000000000000000000000000000000000000000000000000001000)))))
+
+(declare-fun arrayBitIndices!0 ((_ BitVec 64) (_ BitVec 64)) tuple4!946)
+
+(assert (=> b!298452 (= lt!434553 (arrayBitIndices!0 at!281 at!281))))
+
+(declare-fun b!298453 () Bool)
+
+(assert (=> b!298453 (= e!214028 e!214030)))
+
+(declare-fun c!13689 () Bool)
+
+(assert (=> b!298453 (= c!13689 (= (_3!1430 lt!434553) (_4!473 lt!434553)))))
+
+(declare-fun bm!5297 () Bool)
+
+(assert (=> bm!5297 (= call!5300 (byteRangesEq!0 (select (arr!8901 a!429) (_3!1430 lt!434553)) (select (arr!8901 (array!18022 (store (arr!8901 a!429) lt!434525 ((_ extract 7 0) (bvor (bvand ((_ sign_extend 24) (select (arr!8901 a!429) lt!434525)) (bvnot ((_ sign_extend 24) (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526)))) ((_ sign_extend 24) (ite b!315 (select (store (store (store (store (store (store (store (store ((as const (Array (_ BitVec 32) (_ BitVec 8))) #b00000000) #b00000000000000000000000000000000 #b10000000) #b00000000000000000000000000000001 #b01000000) #b00000000000000000000000000000010 #b00100000) #b00000000000000000000000000000011 #b00010000) #b00000000000000000000000000000100 #b00001000) #b00000000000000000000000000000101 #b00000100) #b00000000000000000000000000000110 #b00000010) #b00000000000000000000000000000111 #b00000001) lt!434526) #b00000000))))) (size!7818 a!429))) (_3!1430 lt!434553)) lt!434551 (ite c!13689 lt!434552 #b00000000000000000000000000001000)))))
+
+(declare-fun b!298454 () Bool)
+
+(declare-fun res!246239 () Bool)
+
+(assert (=> b!298454 (= res!246239 (= lt!434552 #b00000000000000000000000000000000))))
+
+(assert (=> b!298454 (=> res!246239 e!214032)))
+
+(assert (=> b!298454 (= e!214029 e!214032)))
+
+(declare-fun b!298455 () Bool)
+
+(assert (=> b!298455 (= e!214030 call!5300)))
+
+(assert (= (and d!100476 (not res!246238)) b!298452))
+
+(assert (= (and b!298452 (not res!246235)) b!298450))
+
+(assert (= (and b!298452 res!246236) b!298453))
+
+(assert (= (and b!298453 c!13689) b!298455))
+
+(assert (= (and b!298453 (not c!13689)) b!298451))
+
+(assert (= (and b!298451 res!246237) b!298454))
+
+(assert (= (and b!298454 (not res!246239)) b!298449))
+
+(assert (= (or b!298455 b!298451) bm!5297))
+
+(declare-fun m!437559 () Bool)
+
+(assert (=> b!298449 m!437559))
+
+(declare-fun m!437561 () Bool)
+
+(assert (=> b!298449 m!437561))
+
+(assert (=> b!298449 m!437559))
+
+(assert (=> b!298449 m!437561))
+
+(declare-fun m!437563 () Bool)
+
+(assert (=> b!298449 m!437563))
+
+(declare-fun m!437565 () Bool)
+
+(assert (=> b!298450 m!437565))
+
+(declare-fun m!437567 () Bool)
+
+(assert (=> b!298452 m!437567))
+
+(declare-fun m!437569 () Bool)
+
+(assert (=> bm!5297 m!437569))
+

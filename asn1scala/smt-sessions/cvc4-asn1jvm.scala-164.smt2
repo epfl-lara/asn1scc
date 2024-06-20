@@ -1,0 +1,49 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!3714 () Bool)
+
+(assert start!3714)
+
+(declare-datatypes ((Unit!1359 0))(
+  ( (Unit!1360) )
+))
+(declare-datatypes ((tuple2!1984 0))(
+  ( (tuple2!1985 (_1!1053 Unit!1359) (_2!1053 (_ BitVec 32))) )
+))
+(declare-fun lt!24427 () tuple2!1984)
+
+(declare-fun e!10029 () tuple2!1984)
+
+(assert (=> start!3714 (= lt!24427 e!10029)))
+
+(declare-fun c!1102 () Bool)
+
+(declare-fun v!288 () (_ BitVec 64))
+
+(assert (=> start!3714 (= c!1102 (= (not (= (bvand v!288 #b0100000000000000000000000000000000000000000000000000000000000000) #b0000000000000000000000000000000000000000000000000000000000000000)) (not (= (bvand v!288 #b1000000000000000000000000000000000000000000000000000000000000000) #b0000000000000000000000000000000000000000000000000000000000000000))))))
+
+(assert (=> start!3714 (and (bvsle #b00000000000000000000000000000000 (_2!1053 lt!24427)) (bvsle (_2!1053 lt!24427) #b00000000000000000000000001000000) (bvslt v!288 #b0000000000000000000000000000000000000000000000000000000000000000) (not (= #b00000000000000000000000000000000 (bvand (_2!1053 lt!24427) #b10000000000000000000000000000000))) (not (= #b00000000000000000000000000000000 (bvand (bvsub #b00000000000000000000000001000000 (_2!1053 lt!24427)) #b10000000000000000000000000000000))))))
+
+(assert (=> start!3714 true))
+
+(declare-fun b!16069 () Bool)
+
+(declare-fun GetBitCountSignedWhile!0 ((_ BitVec 64) (_ BitVec 32)) tuple2!1984)
+
+(assert (=> b!16069 (= e!10029 (GetBitCountSignedWhile!0 v!288 #b00000000000000000000000001000000))))
+
+(declare-fun b!16070 () Bool)
+
+(declare-fun Unit!1361 () Unit!1359)
+
+(assert (=> b!16070 (= e!10029 (tuple2!1985 Unit!1361 #b00000000000000000000000001000000))))
+
+(assert (= (and start!3714 c!1102) b!16069))
+
+(assert (= (and start!3714 (not c!1102)) b!16070))
+
+(declare-fun m!22795 () Bool)
+
+(assert (=> b!16069 m!22795))
+
+(push 1)
+

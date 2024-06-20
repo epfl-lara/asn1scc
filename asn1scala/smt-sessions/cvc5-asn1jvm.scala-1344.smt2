@@ -1,0 +1,27 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!37526 () Bool)
+
+(assert start!37526)
+
+(declare-fun vv!44 () (_ BitVec 64))
+
+(declare-datatypes ((Unit!11990 0))(
+  ( (Unit!11991) )
+))
+(declare-datatypes ((ControlFlow!94 0))(
+  ( (Return!93 (value!6977 (_ BitVec 32))) (Proceed!93 (value!6978 Unit!11990)) )
+))
+(declare-fun Unit!11992 () Unit!11990)
+
+(declare-fun Unit!11993 () Unit!11990)
+
+(assert (=> start!37526 (and (not (is-Return!93 (ite (bvslt vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!93 #b00000000000000000000000001000000) (Proceed!93 Unit!11992)))) (not (is-Return!93 (ite (= vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!93 #b00000000000000000000000000000000) (Proceed!93 Unit!11993)))) (not (= vv!44 #b0000000000000000000000000000000000000000000000000000000000000000)) (or (bvslt vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (and (bvslt #b0111111111111111111111111111111111111111111111111111111111111111 vv!44) (bvslt #b1000000000000000000000000000000000000000000000000000000000000000 vv!44))))))
+
+(assert (=> start!37526 true))
+
+(push 1)
+
+(check-sat)
+
+(pop 1)
+

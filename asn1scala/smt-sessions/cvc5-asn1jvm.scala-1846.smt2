@@ -1,0 +1,44 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!49338 () Bool)
+
+(assert start!49338)
+
+(declare-fun from2!7 () (_ BitVec 64))
+
+(declare-fun nBits!495 () (_ BitVec 64))
+
+(declare-datatypes ((array!12136 0))(
+  ( (array!12137 (arr!6313 (Array (_ BitVec 32) (_ BitVec 8))) (size!5326 (_ BitVec 32))) )
+))
+(declare-fun arr1!24 () array!12136)
+
+(declare-fun from1!7 () (_ BitVec 64))
+
+(assert (=> start!49338 (and (bvsge from1!7 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsge from2!7 #b0000000000000000000000000000000000000000000000000000000000000000) (bvsge nBits!495 #b0000000000000000000000000000000000000000000000000000000000000000) (bvslt from2!7 (bvsub #b0111111111111111111111111111111111111111111111111111111111111111 nBits!495)) (bvslt from1!7 (bvsub #b0111111111111111111111111111111111111111111111111111111111111111 nBits!495)) (bvsle (bvadd from1!7 nBits!495) (bvmul #b0000000000000000000000000000000000000000000000000000000000001000 ((_ sign_extend 32) (size!5326 arr1!24)))) (= (bvand from2!7 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand nBits!495 #b1000000000000000000000000000000000000000000000000000000000000000)) (not (= (bvand from2!7 #b1000000000000000000000000000000000000000000000000000000000000000) (bvand (bvadd from2!7 nBits!495) #b1000000000000000000000000000000000000000000000000000000000000000))))))
+
+(assert (=> start!49338 true))
+
+(declare-fun array_inv!5067 (array!12136) Bool)
+
+(assert (=> start!49338 (array_inv!5067 arr1!24)))
+
+(declare-fun bs!19471 () Bool)
+
+(assert (= bs!19471 start!49338))
+
+(declare-fun m!356555 () Bool)
+
+(assert (=> bs!19471 m!356555))
+
+(push 1)
+
+(assert (not start!49338))
+
+(check-sat)
+
+(pop 1)
+
+(push 1)
+
+(check-sat)
+

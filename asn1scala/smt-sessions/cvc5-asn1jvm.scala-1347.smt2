@@ -1,0 +1,27 @@
+; Options: -q --produce-models --incremental --print-success --lang smt2.6
+(declare-fun start!37544 () Bool)
+
+(assert start!37544)
+
+(declare-fun vv!44 () (_ BitVec 64))
+
+(declare-datatypes ((Unit!12020 0))(
+  ( (Unit!12021) )
+))
+(declare-datatypes ((ControlFlow!103 0))(
+  ( (Return!102 (value!7010 (_ BitVec 32))) (Proceed!102 (value!7011 Unit!12020)) )
+))
+(declare-fun Unit!12022 () Unit!12020)
+
+(declare-fun Unit!12023 () Unit!12020)
+
+(assert (=> start!37544 (and (not (is-Return!102 (ite (bvslt vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!102 #b00000000000000000000000001000000) (Proceed!102 Unit!12022)))) (let ((bdg!10191 (ite (= vv!44 #b0000000000000000000000000000000000000000000000000000000000000000) (Return!102 #b00000000000000000000000000000000) (Proceed!102 Unit!12023)))) (and (is-Return!102 bdg!10191) (bvsge (value!7010 bdg!10191) #b00000000000000000000000000000000) (bvsle (value!7010 bdg!10191) #b00000000000000000000000001000000) (or (not (= (value!7010 bdg!10191) #b00000000000000000000000001000000)) (bvsge vv!44 #b0000000000000000000000000000000000000000000000000000000000000000)) (or (bvslt ((_ sign_extend 32) (value!7010 bdg!10191)) #b0000000000000000000000000000000000000000000000000000000000000000) (bvsgt ((_ sign_extend 32) (value!7010 bdg!10191)) #b0000000000000000000000000000000000000000000000000000000001000000)))))))
+
+(assert (=> start!37544 true))
+
+(push 1)
+
+(check-sat)
+
+(pop 1)
+
