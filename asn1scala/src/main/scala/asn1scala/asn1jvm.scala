@@ -312,7 +312,7 @@ def uint2intWhile(v: ULong, uintSizeInBytes: Int): Long = {
     if !bIsNegative then
         return v
 
-    var i: Int = NO_OF_BYTES_IN_JVM_LONG-1
+    var i: Int = NO_OF_BYTES_IN_JVM_LONG-1 // 7
     (while i >= uintSizeInBytes do
         decreases(i)
         vv |= ber_aux(i)
@@ -337,50 +337,14 @@ def uint2int(v: ULong, uintSizeInBytes: Int): Long = {
     if !bIsNegative then
         return v
 
-    var i: Int = NO_OF_BYTES_IN_JVM_LONG-1
+    if(uintSizeInBytes <= 7) then vv |= ber_aux(7)
+    if(uintSizeInBytes <= 6) then vv |= ber_aux(6)
+    if(uintSizeInBytes <= 5) then vv |= ber_aux(5)
+    if(uintSizeInBytes <= 4) then vv |= ber_aux(4)
+    if(uintSizeInBytes <= 3) then vv |= ber_aux(3)
+    if(uintSizeInBytes <= 2) then vv |= ber_aux(2)
+    if(uintSizeInBytes <= 1) then vv |= ber_aux(1)
 
-    if (uintSizeInBytes == 1) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    vv |= ber_aux(5)
-    vv |= ber_aux(4)
-    vv |= ber_aux(3)
-    vv |= ber_aux(2)
-    vv |= ber_aux(1)
-    }
-    else if (uintSizeInBytes == 2) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    vv |= ber_aux(5)
-    vv |= ber_aux(4)
-    vv |= ber_aux(3)
-    vv |= ber_aux(2)
-    }
-    else if (uintSizeInBytes == 3) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    vv |= ber_aux(5)
-    vv |= ber_aux(4)
-    vv |= ber_aux(3)
-    }
-    else if (uintSizeInBytes == 4) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    vv |= ber_aux(5)
-    vv |= ber_aux(4)
-    }
-    else if (uintSizeInBytes == 5) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    vv |= ber_aux(5)
-    }
-    else if (uintSizeInBytes == 6) {
-    vv |= ber_aux(7)
-    vv |= ber_aux(6)
-    }
-    else if (uintSizeInBytes == 7) {
-    vv |= ber_aux(7)
-    }
     -(~vv) - 1
 }
 
