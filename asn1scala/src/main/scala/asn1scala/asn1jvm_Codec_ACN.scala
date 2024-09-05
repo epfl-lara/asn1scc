@@ -223,6 +223,16 @@ case class ACN(base: Codec) {
       require(nBits <= encodedSizeInBits && encodedSizeInBits <= 64)
       require(BitStream.validate_offset_bits(base.bitStream.buf.length, base.bitStream.currentByte, base.bitStream.currentBit, encodedSizeInBits))
       enc_Int_PositiveInteger_ConstSize(intVal.toLong.toRawULong, encodedSizeInBits)
+   }.ensuring { _ =>
+      val w1 = old(this)
+      val w3 = this
+      w1.base.bitStream.buf.length == w3.base.bitStream.buf.length && BitStream.bitIndex(w3.base.bitStream.buf.length, w3.base.bitStream.currentByte, w3.base.bitStream.currentBit) == BitStream.bitIndex(w1.base.bitStream.buf.length, w1.base.bitStream.currentByte, w1.base.bitStream.currentBit) + encodedSizeInBits
+      && w1.isPrefixOf(w3) && {
+         val (r1, r3) = ACN.reader(w1, w3)
+         validateOffsetBitsContentIrrelevancyLemma(w1.base.bitStream, w3.base.bitStream.buf, encodedSizeInBits)
+         val (r3Got, iGot) = r1.dec_Int_PositiveInteger_ConstSize_pure(encodedSizeInBits)
+         iGot.toRaw.toInt == intVal && r3Got == r3
+      }
    }
 
    // @opaque @inlineOnce
