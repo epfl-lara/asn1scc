@@ -339,7 +339,6 @@ def uint2int(v: ULong, uintSizeInBytes: Int): Long = {
 
     var i: Int = NO_OF_BYTES_IN_JVM_LONG-1
 
-    // Case for uintSizeInBytes == 1
     if (uintSizeInBytes == 1) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
@@ -349,7 +348,6 @@ def uint2int(v: ULong, uintSizeInBytes: Int): Long = {
     vv |= ber_aux(2)
     vv |= ber_aux(1)
     }
-    // Case for uintSizeInBytes == 2
     else if (uintSizeInBytes == 2) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
@@ -358,7 +356,6 @@ def uint2int(v: ULong, uintSizeInBytes: Int): Long = {
     vv |= ber_aux(3)
     vv |= ber_aux(2)
     }
-    // Case for uintSizeInBytes == 3
     else if (uintSizeInBytes == 3) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
@@ -366,25 +363,21 @@ def uint2int(v: ULong, uintSizeInBytes: Int): Long = {
     vv |= ber_aux(4)
     vv |= ber_aux(3)
     }
-    // Case for uintSizeInBytes == 4
     else if (uintSizeInBytes == 4) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
     vv |= ber_aux(5)
     vv |= ber_aux(4)
     }
-    // Case for uintSizeInBytes == 5
     else if (uintSizeInBytes == 5) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
     vv |= ber_aux(5)
     }
-    // Case for uintSizeInBytes == 6
     else if (uintSizeInBytes == 6) {
     vv |= ber_aux(7)
     vv |= ber_aux(6)
     }
-    // Case for uintSizeInBytes == 7
     else if (uintSizeInBytes == 7) {
     vv |= ber_aux(7)
     }
